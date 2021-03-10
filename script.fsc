@@ -7,4 +7,4 @@ print(name);
 print(age);
 tenYearsLater = 10 + age;
 
-print("In 10 Years he will be " + age + 10 + " Years old");
+printf("In 10 Years {0} will be {1} years old", name, tenYearsLater);

@@ -18,6 +18,7 @@ void panic(std::string str, token::Token *tval)
 void parser::Parser::parse(std::vector<token::Token *> program)
 {
     this->mFunctionMap["print"] = new runtime::PrintFunction();
+    this->mFunctionMap["printf"] = new runtime::PrintFormatedFunction();
     this->mFunctionMap["add"] = new runtime::Add();
     this->mFunctionMap["multiply"] = new runtime::Multiply();
     this->mFunctionMap["divide"] = new runtime::Divide();
@@ -82,10 +83,11 @@ runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Tok
         toper = tokens[*idx + b];
         if (toper->mType == token::Type::OPERATOR && toper->mContent == ")")
             break;
-        else if(toper->mContent != ",") {
+        else if (toper->mContent != ",")
+        {
             panic("Unexcepted value!", toper);
         }
-        b++;
+        *idx += 1;
     }
 
     return this->mFunctionMap.at(tInvoke->mContent)->execute(args);
@@ -149,7 +151,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tInvoke, token::To
             {
                 *idx += 1;
                 runtime::Variable *secondArg = this->nextVariable(potentialOperator, tokens, idx);
-                
+
                 var = this->mFunctionMap.at(op)->execute(std::vector<runtime::Variable *>{
                     var,
                     secondArg,
