@@ -1,4 +1,10 @@
-info = "I'm worldOneo";
-print(info);
+greeting = "Hello, ";
+name = "worldOneo";
+age = 16;
+print(greeting + name + "!");
+print(name);
 
-print(10*10/5);
+print(age);
+tenYearsLater = 10 + age;
+
+print("In 10 Years he will be " + age + 10 + " Years old");

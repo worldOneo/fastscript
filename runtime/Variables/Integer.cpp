@@ -25,7 +25,7 @@ Integer::Integer()
     this->data = 0;
 }
 
-Integer *Integer::add(Variable *v)
+Variable *Integer::add(Variable *v)
 {
     Integer *intVar = dynamic_cast<Integer *>(v);
     if (intVar)
@@ -33,6 +33,11 @@ Integer *Integer::add(Variable *v)
         int i = intVar->getValue();
         int m = this->getValue();
         return new Integer(i + m);
+    }
+    String *stringVar = dynamic_cast<String *>(v);
+    if (stringVar)
+    {
+        return new String(STRING, std::to_string(this->data).append(stringVar->getValue()));
     }
     char err[50];
     std::sprintf(err, "Unable to add integer and %s", v->name().c_str());

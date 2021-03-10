@@ -27,12 +27,12 @@ int main(int argc, char *argv[])
 
         token::Tokenizer tokenizer;
         std::vector<token::Token *> tokens = tokenizer.parse(fileContents);
-        for (auto parsed_token : tokens)
+        /*for (auto parsed_token : tokens)
         {
             std::cout << token::T_CANONICAL[parsed_token->mType]
                       << " " << parsed_token->mContent << " l: "
                       << parsed_token->mLine << std::endl;
-        }
+        }*/
         parser::Parser parser;
         parser.parse(tokens);
     }

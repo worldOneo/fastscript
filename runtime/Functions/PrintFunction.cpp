@@ -27,7 +27,7 @@ namespace fastscript::runtime
         if (intVar)
         {
             std::cout << intVar->getValue() << std::endl;
-            return nullptr;
         }
+        return nullptr;
     }
 }

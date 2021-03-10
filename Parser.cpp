@@ -10,7 +10,7 @@ using namespace fastscript;
 void panic(std::string str, token::Token *tval)
 {
     std::cout << token::T_CANONICAL[tval->mType]
-              << " " << tval->mContent << " l: "
+              << " " << tval->mContent << " line: "
               << tval->mLine << std::endl;
     throw std::runtime_error(str);
 }
@@ -82,6 +82,9 @@ runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Tok
         toper = tokens[*idx + b];
         if (toper->mType == token::Type::OPERATOR && toper->mContent == ")")
             break;
+        else if(toper->mContent != ",") {
+            panic("Unexcepted value!", toper);
+        }
         b++;
     }
 
@@ -147,12 +150,10 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tInvoke, token::To
                 *idx += 1;
                 runtime::Variable *secondArg = this->nextVariable(potentialOperator, tokens, idx);
                 
-                auto _var = this->mFunctionMap.at(op)->execute(std::vector<runtime::Variable *>{
+                var = this->mFunctionMap.at(op)->execute(std::vector<runtime::Variable *>{
                     var,
                     secondArg,
                 });
-                delete var;
-                var = _var;
             }
         }
         return var;
