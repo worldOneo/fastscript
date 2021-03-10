@@ -9,11 +9,6 @@ namespace fastscript::runtime
         if (args.capacity() != 1)
         {
             std::cout << "Too many arguements: " << args.capacity() << std::endl;
-            for (auto parsed_token : args)
-            {
-                Integer *intVar = dynamic_cast<Integer *>(parsed_token);
-                std::cout << intVar->getValue() << std::endl;
-            }
             return nullptr;
         }
         String *stringVar = dynamic_cast<String *>(args[0]);
@@ -36,11 +31,6 @@ namespace fastscript::runtime
         if (args.capacity() < 1)
         {
             std::cout << "Not enough args: " << args.capacity() << std::endl;
-            for (auto parsed_token : args)
-            {
-                Integer *intVar = dynamic_cast<Integer *>(parsed_token);
-                std::cout << intVar->getValue() << std::endl;
-            }
             return nullptr;
         }
         String *stringVar = dynamic_cast<String *>(args[0]);
