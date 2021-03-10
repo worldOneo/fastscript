@@ -1,0 +1,2 @@
+info = "my name is worldOneo";
+print(info);
