@@ -1,2 +1,4 @@
-info = "my name is worldOneo";
+info = "I'm worldOneo";
 print(info);
+
+print(10*10/5);

@@ -3,6 +3,15 @@
 
 using namespace fastscript::token;
 
+void endToken(std::vector<Token *> &tokenized, Token *&token)
+{
+    if (token->mType != WHITESPACE)
+        tokenized.push_back(token);
+    else
+        delete token;
+    token = new Token();
+}
+
 std::vector<Token *> Tokenizer::parse(std::string &script)
 {
     std::vector<Token *> tokenized;
@@ -15,11 +24,10 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
         {
 
         case '\n':
-            lineCount++;
         case '\r':
-            lineCount++;
         case ' ':
         case '\t':
+            lineCount += (curr == '\n') || (curr == '\r');
             if (token->mType == STRING)
             {
                 token->mContent.append(sizeof(curr), curr);
@@ -27,8 +35,7 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
             }
             if (token->mType != WHITESPACE)
             {
-                tokenized.push_back(token);
-                token = new Token();
+                endToken(tokenized, token);
                 token->mLine = lineCount;
             }
             token->mType = WHITESPACE;
@@ -38,18 +45,19 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
             if (token->mType == IDENTIFIER || token->mType == STRING)
             {
                 token->mContent.push_back(curr);
+                break;
             }
-            else if (token->mType == WHITESPACE || token->mType == INTEGER)
-            {
-                token->mType = INTEGER;
-                token->mContent.push_back(curr);
+            if (token->mType == OPERATOR) {
+                endToken(tokenized, token);
+                token->mLine = lineCount;
             }
+            token->mType = INTEGER;
+            token->mContent.push_back(curr);
             break;
         case 'A' ... 'z':
             if (token->mType == OPERATOR)
             {
-                tokenized.push_back(token);
-                token = new Token();
+                endToken(tokenized, token);
                 token->mType = IDENTIFIER;
                 token->mContent.append(sizeof(curr), curr);
                 token->mLine = lineCount;
@@ -73,9 +81,7 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
                 token->mContent.append(sizeof(curr), curr);
                 break;
             }
-            if (token->mType != WHITESPACE)
-                tokenized.push_back(token);
-            token = new Token();
+            endToken(tokenized, token);
             token->mType = OPERATOR;
             token->mContent.append(sizeof(curr), curr);
             token->mLine = lineCount;
@@ -89,9 +95,7 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
                 token->mType = WHITESPACE;
                 break;
             }
-            if (token->mType != WHITESPACE)
-                tokenized.push_back(token);
-            token = new Token();
+            endToken(tokenized, token);
             token->mLine = lineCount;
             token->mType = STRING;
             break;

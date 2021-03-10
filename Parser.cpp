@@ -3,6 +3,7 @@
 #include "Parser.hpp"
 #include "runtime/Variables/Variable.hpp"
 #include "runtime/Functions/PrintFunction.hpp"
+#include "runtime/Functions/MathFunctions.hpp"
 
 using namespace fastscript;
 
@@ -17,6 +18,11 @@ void panic(std::string str, token::Token *tval)
 void parser::Parser::parse(std::vector<token::Token *> program)
 {
     this->mFunctionMap["print"] = new runtime::PrintFunction();
+    this->mFunctionMap["add"] = new runtime::Add();
+    this->mFunctionMap["multiply"] = new runtime::Multiply();
+    this->mFunctionMap["divide"] = new runtime::Divide();
+    this->mFunctionMap["subtract"] = new runtime::Subtract();
+
     token::Token *currToken;
     token::Token *tokens[program.capacity()];
     std::copy(program.begin(), program.end(), tokens);
@@ -24,9 +30,6 @@ void parser::Parser::parse(std::vector<token::Token *> program)
     while (index < program.capacity())
     {
         currToken = tokens[index];
-        /*std::cout << token::T_CANONICAL[currToken->mType]
-                  << " " << currToken->mContent << " l: "
-                  << currToken->mLine << std::endl;*/
         switch (currToken->mType)
         {
         case token::IDENTIFIER:
@@ -54,10 +57,17 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
 
     auto tval = tokens[*idx + 1];
 
-    try {
+    try
+    {
         this->mVariableMap[tInvoke->mContent] = this->nextVariable(tInvoke, tokens, idx);
-    } catch (std::exception& ignored) {
-        panic("Invalid assignment at line " + std::to_string(tval->mLine), tInvoke);
+    }
+    catch (std::exception &err)
+    {
+        panic(std::string("Invalid assignment at line ")
+                  .append(std::to_string(tval->mLine))
+                  .append(" -> ")
+                  .append(std::string(err.what())),
+              tInvoke);
     }
 }
 
@@ -68,9 +78,10 @@ runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Tok
     while (true)
     {
         token::Token *toper = tokens[*idx + b];
+        args.push_back(this->nextVariable(toper, tokens, idx));
+        toper = tokens[*idx + b];
         if (toper->mType == token::Type::OPERATOR && toper->mContent == ")")
             break;
-        args.push_back(this->nextVariable(toper, tokens, idx));
         b++;
     }
 
@@ -80,36 +91,70 @@ runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Tok
 runtime::Variable *parser::Parser::nextVariable(token::Token *tInvoke, token::Token *tokens[], int *idx)
 {
     auto tval = tokens[*idx + 1];
+    runtime::Variable *var = nullptr;
     if (tval->mType == token::INTEGER)
     {
-        return new runtime::Integer(runtime::INTEGER, tval->mContent);
+        *idx += 1;
+        var = new runtime::Integer(runtime::INTEGER, tval->mContent);
     }
     else if (tval->mType == token::STRING)
     {
-        return new runtime::String(runtime::STRING, tval->mContent);
+        *idx += 1;
+        var = new runtime::String(runtime::STRING, tval->mContent);
     }
     else if (tval->mType == token::IDENTIFIER)
     {
+        auto toper = tokens[*idx + 1];
         if (this->mVariableMap.find(tval->mContent) != this->mVariableMap.end())
         {
-            return this->mVariableMap.at(tval->mContent);
+            *idx += 1;
+            var = this->mVariableMap.at(tval->mContent);
         }
-        else
-        {
-            std::cout << "Variable " << tval->mContent << " not found " << std::endl;
-            auto it = this->mVariableMap.begin();
-            while (it != this->mVariableMap.end())
-            {
-                std::cout << it->first << " :: " << it->second << std::endl;
-                it++;
-            }
-        }
-        auto toper = tokens[*idx + 1];
-        if (toper->mType == token::OPERATOR && toper->mContent == "(")
+        else if (toper->mType == token::OPERATOR && toper->mContent == "(")
         {
             *idx += 1;
-            return this->funcionCall(tval, tokens, idx);
+            var = this->funcionCall(tval, tokens, idx);
         }
     }
-    panic("Invalid value!", tval);
+    if (var == nullptr)
+    {
+        panic("Invalid value!", tval);
+    }
+    else
+    {
+        token::Token *potentialOperator = tokens[*idx + 1];
+        if (potentialOperator->mType == token::OPERATOR)
+        {
+            std::string op;
+            if (potentialOperator->mContent == "+")
+            {
+                op = "add";
+            }
+            else if (potentialOperator->mContent == "*")
+            {
+                op = "multiply";
+            }
+            else if (potentialOperator->mContent == "-")
+            {
+                op = "subtract";
+            }
+            else if (potentialOperator->mContent == "/")
+            {
+                op = "divide";
+            }
+            if (!op.empty())
+            {
+                *idx += 1;
+                runtime::Variable *secondArg = this->nextVariable(potentialOperator, tokens, idx);
+                
+                auto _var = this->mFunctionMap.at(op)->execute(std::vector<runtime::Variable *>{
+                    var,
+                    secondArg,
+                });
+                delete var;
+                var = _var;
+            }
+        }
+        return var;
+    }
 }

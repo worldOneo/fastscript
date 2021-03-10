@@ -35,7 +35,7 @@ Integer *Integer::add(Variable *v)
         return new Integer(i + m);
     }
     char err[50];
-    std::printf(err, "Unable to add integer and %s", v->name());
+    std::sprintf(err, "Unable to add integer and %s", v->name().c_str());
     throw std::runtime_error(std::string(err));
 }
 
@@ -49,21 +49,21 @@ Integer *Integer::multiply(Variable *v)
         return new Integer(i * m);
     }
     char err[50];
-    std::printf(err, "Unable to add integer and %s", v->name());
+    std::sprintf(err, "Unable to multiply integer and %s", v->name().c_str());
     throw std::runtime_error(std::string(err));
 }
 
 Integer *Integer::divide(Variable *v)
 {
-   Integer *intVar = dynamic_cast<Integer *>(v);
+    Integer *intVar = dynamic_cast<Integer *>(v);
     if (intVar)
     {
         int i = intVar->getValue();
         int m = this->getValue();
-        return new Integer(i / m);
+        return new Integer(m / i);
     }
     char err[50];
-    std::printf(err, "Unable to add integer and %s", v->name());
+    std::sprintf(err, "Unable to divide integer and %s", v->name().c_str());
     throw std::runtime_error(std::string(err));
 }
 
@@ -74,12 +74,13 @@ Integer *Integer::subtract(Variable *v)
     {
         int i = intVar->getValue();
         int m = this->getValue();
-        return new Integer(i - m);
+        return new Integer(m - i);
     }
     char err[50];
-    std::printf(err, "Unable to add integer and %s", v->name());
+    std::sprintf(err, "Unable to subtract integer and %s", v->name().c_str());
     throw std::runtime_error(std::string(err));
 }
 
-Integer::~Integer() {
+Integer::~Integer()
+{
 }

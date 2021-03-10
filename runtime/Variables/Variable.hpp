@@ -42,9 +42,10 @@ namespace fastscript::runtime
     class Integer : public Variable
     {
     protected:
-        int data;
+        double data;
 
     public:
+        std::string name() { return "Integer"; }
         int getValue() { return this->data; };
         Integer *add(Variable *variable);
         Integer *multiply(Variable *variable);
@@ -62,6 +63,11 @@ namespace fastscript::runtime
         std::string data;
 
     public:
+        //String *add(Variable *variable);
+        //String *multiply(Variable *variable);
+        //String *subtract(Variable *variable);
+        //String *divide(Variable *variable);
+        std::string name() { return "string"; }
         String(Types type, std::string data) { this->data = data; };
         std::string getValue() { return this->data; };
     };

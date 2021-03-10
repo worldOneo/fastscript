@@ -2,26 +2,32 @@
 #include "../Utility.hpp"
 #include <iostream>
 
-using namespace fastscript::runtime;
-
-Variable *fastscript::runtime::PrintFunction::execute(std::vector<Variable *> args)
+namespace fastscript::runtime
 {
-    if (args.capacity() != 1)
+    Variable *PrintFunction::execute(std::vector<Variable *> args)
     {
-        std::cout << "-" << std::endl;
-        return nullptr;
-    }
-    String *stringVar = dynamic_cast<String *>(args[0]);
-    if (stringVar)
-    {
-        std::cout << stringVar->getValue() << std::endl;
-        return nullptr;
-    }
+        if (args.capacity() != 1)
+        {
+            std::cout << "Too many arguements: " << args.capacity() << std::endl;
+            for (auto parsed_token : args)
+            {
+                Integer* intVar = dynamic_cast<Integer*>(parsed_token);
+                std::cout << intVar->getValue() << std::endl;
+            }
+            return nullptr;
+        }
+        String *stringVar = dynamic_cast<String *>(args[0]);
+        if (stringVar)
+        {
+            std::cout << stringVar->getValue() << std::endl;
+            return nullptr;
+        }
 
-    Integer *intVar = dynamic_cast<Integer *>(args[0]);
-    if (intVar)
-    {
-        std::cout << intVar->getValue() << std::endl;
-        return nullptr;
+        Integer *intVar = dynamic_cast<Integer *>(args[0]);
+        if (intVar)
+        {
+            std::cout << intVar->getValue() << std::endl;
+            return nullptr;
+        }
     }
 }
