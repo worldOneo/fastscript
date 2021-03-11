@@ -4,6 +4,7 @@
 #include "runtime/Variables/Variable.hpp"
 #include "runtime/Functions/PrintFunction.hpp"
 #include "runtime/Functions/MathFunctions.hpp"
+#include "runtime/Functions/Compare.hpp"
 
 using namespace fastscript;
 
@@ -28,6 +29,13 @@ parser::Parser::Parser()
     this->mFunctionMap["xor"] = new runtime::LogicXOR();
     this->mFunctionMap["and"] = new runtime::LogicAND();
     this->mFunctionMap["or"] = new runtime::LogicOR();
+    this->mFunctionMap["rshft"] = new runtime::LogicRSHFT();
+    this->mFunctionMap["lshft"] = new runtime::LogicLSHFT();
+    this->mFunctionMap["equal"] = new runtime::LogicEQ();
+    this->mFunctionMap["gt"] = new runtime::LogicGT();
+    this->mFunctionMap["lt"] = new runtime::LogicLT();
+    this->mFunctionMap["gteq"] = new runtime::LogicGTEQ();
+    this->mFunctionMap["lteq"] = new runtime::LogicLTEQ();
 
     this->mOperatorMap["+"] = "add";
     this->mOperatorMap["-"] = "subtract";
@@ -36,6 +44,14 @@ parser::Parser::Parser()
     this->mOperatorMap["^"] = "xor";
     this->mOperatorMap["|"] = "or";
     this->mOperatorMap["&"] = "and";
+    this->mOperatorMap["<<"] = "lshft";
+    this->mOperatorMap[">>"] = "rshft";
+    this->mOperatorMap[">>"] = "rshft";
+    this->mOperatorMap["=="] = "equal";
+    this->mOperatorMap[">"] = "gt";
+    this->mOperatorMap["<"] = "lt";
+    this->mOperatorMap["<="] = "lteq";
+    this->mOperatorMap[">="] = "gteq";
 }
 
 void parser::Parser::parse(std::vector<token::Token *> program)

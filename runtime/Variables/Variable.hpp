@@ -61,6 +61,14 @@ namespace fastscript::runtime
         {
             panic_throw("XOR not implemented for %s", this);
         };
+        virtual Variable *rshft(Variable *variable)
+        {
+            panic_throw("Right-shift not implemented for %s", this);
+        };
+        virtual Variable *lshft(Variable *variable)
+        {
+            panic_throw("Right-shift not implemented for %s", this);
+        };
         virtual int as_int()
         {
             return 0;
@@ -71,28 +79,6 @@ namespace fastscript::runtime
     {
     public:
         virtual std::string to_string() { return "to_string not implemented"; };
-    };
-
-    class Integer : public MathVar, public StringAble
-    {
-    protected:
-        int data;
-
-    public:
-        std::string name() { return "Integer"; }
-        std::string to_string();
-        int as_int() { return this->data; }
-        Variable *add(Variable *variable);
-        Integer *multiply(Variable *variable);
-        Integer *subtract(Variable *variable);
-        Integer *divide(Variable *variable);
-        Integer *lor(Variable *);
-        Integer *land(Variable *);
-        Integer *lxor(Variable *);
-        Integer(Types type, std::string data);
-        Integer(int i);
-        Integer();
-        ~Integer();
     };
 
     class String : public Variable, public StringAble
@@ -110,12 +96,51 @@ namespace fastscript::runtime
         std::string to_string();
     };
 
-    class Boolean : public MathVar, public StringAble
+    class Boolean;
+
+    class Comparator
+    {
+    public:
+        virtual Boolean *greater(Variable *variable) { return nullptr; };
+        virtual Boolean *less(Variable *variable) { return nullptr; };
+        virtual Boolean *equals(Variable *variable) { return nullptr; };
+    };
+
+    class Integer : public MathVar, public StringAble, public Comparator
+    {
+    protected:
+        int data;
+
+    public:
+        std::string name() { return "Integer"; }
+        std::string to_string();
+        int as_int() { return this->data; }
+        Variable *add(Variable *variable);
+        Integer *multiply(Variable *variable);
+        Integer *subtract(Variable *variable);
+        Integer *divide(Variable *variable);
+        Integer *lor(Variable *);
+        Integer *land(Variable *);
+        Integer *lxor(Variable *);
+        Integer *lshft(Variable *);
+        Integer *rshft(Variable *);
+        Boolean *greater(Variable *variable);
+        Boolean *less(Variable *variable);
+        Boolean *equals(Variable *variable);
+        Integer(Types type, std::string data);
+        Integer(int i);
+        Integer();
+        ~Integer();
+    };
+
+    class Boolean : public MathVar, public StringAble, public Comparator
     {
     protected:
         bool value;
 
     public:
+        Integer *lshft(Variable *);
+        Integer *rshft(Variable *);
         Integer *lor(Variable *);
         Integer *land(Variable *);
         Integer *lxor(Variable *);
@@ -123,6 +148,9 @@ namespace fastscript::runtime
         Integer *multiply(Variable *variable);
         Integer *subtract(Variable *variable);
         Integer *divide(Variable *variable);
+        Boolean *greater(Variable *variable);
+        Boolean *less(Variable *variable);
+        Boolean *equals(Variable *variable);
         //Integer *lnot();
         std::string to_string() { return this->value ? "true" : "false"; }
         int as_int() { return this->value; }

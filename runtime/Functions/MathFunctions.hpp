@@ -8,5 +8,7 @@ namespace fastscript::runtime {
     function_with_name(LogicOR);
     function_with_name(LogicXOR);
     function_with_name(LogicAND);
+    function_with_name(LogicRSHFT);
+    function_with_name(LogicLSHFT);
     function_with_name(AsBoolean);
 }

@@ -14,11 +14,17 @@ namespace fastscript::runtime::utility
         return sizeof(arr) / sizeof(arr[0]);
     }
 
-    Integer *_math_operation(MathVar *var1, Variable *var2, _math_operator oper);
+    int _math_operation(MathVar *var1, Variable *var2, _math_operator oper);
 
     int _math_xor(int a, int b);
     int _math_or(int a, int b);
     int _math_and(int a, int b);
+    int _math_rshft(int a, int b);
+    int _math_lshft(int a, int b);
+
+    int _math_eq(int a, int b);
+    int _math_gt(int a, int b);
+    int _math_lt(int a, int b);
 
     int _math_add(int a, int b);
     int _math_subtract(int a, int b);

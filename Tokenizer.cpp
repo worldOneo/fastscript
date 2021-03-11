@@ -13,6 +13,10 @@ void endToken(std::vector<Token *> &tokenized, Token *&token)
             {
                 token->mType = BOOLEAN;
             }
+            else if (token->mContent == "if")
+            {
+                token->mType == IFSTMT;
+            }
         }
         tokenized.push_back(token);
     }
@@ -65,7 +69,7 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
             token->mContent.push_back(curr);
             break;
         case 'A' ... 'Z':
-        case 'a'...'z':
+        case 'a' ... 'z':
             if (token->mType == OPERATOR)
             {
                 endToken(tokenized, token);
@@ -85,8 +89,8 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
             break;
         case '(' ... '/': //()*+,-./
         case '&':
-        case '|': 
-        case '['...'^': // [\]^
+        case '|':
+        case '[' ... '^': // [\]^
         case '{':
         case '}':
         case ':' ... '?': //:;<>=?
@@ -94,6 +98,18 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
             {
                 token->mContent.append(sizeof(curr), curr);
                 break;
+            }
+            if (token->mType == OPERATOR)
+            {
+                if ((curr == '=' && token->mContent == "=") ||
+                    (curr == '=' && token->mContent == ">") ||
+                    (curr == '=' && token->mContent == "<") ||
+                    (curr == '<' && token->mContent == "<") ||
+                    (curr == '>' && token->mContent == ">"))
+                {
+                    token->mContent.append(sizeof(curr), curr);
+                    break;
+                }
             }
             endToken(tokenized, token);
             token->mType = OPERATOR;

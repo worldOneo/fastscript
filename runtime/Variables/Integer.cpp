@@ -40,32 +40,57 @@ namespace fastscript::runtime
 
     Integer *Integer::multiply(Variable *v)
     {
-        return utility::_math_operation(this, v, utility::_math_multiply);
+        return new Integer(utility::_math_operation(this, v, utility::_math_multiply));
     }
 
     Integer *Integer::divide(Variable *v)
     {
-        return utility::_math_operation(this, v, utility::_math_divide);
+        return new Integer(utility::_math_operation(this, v, utility::_math_divide));
     }
 
     Integer *Integer::subtract(Variable *v)
     {
-        return utility::_math_operation(this, v, utility::_math_subtract);
+        return new Integer(utility::_math_operation(this, v, utility::_math_subtract));
     }
 
     Integer *Integer::land(Variable *var)
     {
-        return utility::_math_operation(this, var, utility::_math_and);
+        return new Integer(utility::_math_operation(this, var, utility::_math_and));
     }
 
     Integer *Integer::lxor(Variable *var)
     {
-        return utility::_math_operation(this, var, utility::_math_xor);
+        return new Integer(utility::_math_operation(this, var, utility::_math_xor));
     }
 
     Integer *Integer::lor(Variable *var)
     {
-        return utility::_math_operation(this, var, utility::_math_or);
+        return new Integer(utility::_math_operation(this, var, utility::_math_or));
+    }
+
+    Integer *Integer::rshft(Variable *var)
+    {
+        return new Integer(utility::_math_operation(this, var, utility::_math_rshft));
+    }
+
+    Integer *Integer::lshft(Variable *var)
+    {
+        return new Integer(utility::_math_operation(this, var, utility::_math_lshft));
+    }
+
+    Boolean *Integer::less(Variable *v)
+    {
+        return new Boolean(utility::_math_operation(this, v, utility::_math_lt));
+    }
+
+    Boolean *Integer::equals(Variable *v)
+    {
+        return new Boolean(utility::_math_operation(this, v, utility::_math_eq));
+    }
+
+    Boolean *Integer::greater(Variable *v)
+    {
+        return new Boolean(utility::_math_operation(this, v, utility::_math_gt));
     }
 
     std::string Integer::to_string()
