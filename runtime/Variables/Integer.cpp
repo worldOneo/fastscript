@@ -53,6 +53,21 @@ namespace fastscript::runtime
         return utility::_math_operation(this, v, utility::_math_subtract);
     }
 
+    Integer *Integer::land(Variable *var)
+    {
+        return utility::_math_operation(this, var, utility::_math_and);
+    }
+
+    Integer *Integer::lxor(Variable *var)
+    {
+        return utility::_math_operation(this, var, utility::_math_xor);
+    }
+
+    Integer *Integer::lor(Variable *var)
+    {
+        return utility::_math_operation(this, var, utility::_math_or);
+    }
+
     std::string Integer::to_string()
     {
         return std::to_string(this->data);

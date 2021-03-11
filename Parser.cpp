@@ -15,15 +15,31 @@ void panic(std::string str, token::Token *tval)
     throw std::runtime_error(str);
 }
 
-void parser::Parser::parse(std::vector<token::Token *> program)
+parser::Parser::Parser()
 {
     this->mFunctionMap["print"] = new runtime::PrintFunction();
     this->mFunctionMap["printf"] = new runtime::PrintFormatedFunction();
+    this->mFunctionMap["boolean"] = new runtime::AsBoolean();
+
     this->mFunctionMap["add"] = new runtime::Add();
+    this->mFunctionMap["subtract"] = new runtime::Subtract();
     this->mFunctionMap["multiply"] = new runtime::Multiply();
     this->mFunctionMap["divide"] = new runtime::Divide();
-    this->mFunctionMap["subtract"] = new runtime::Subtract();
+    this->mFunctionMap["xor"] = new runtime::LogicXOR();
+    this->mFunctionMap["and"] = new runtime::LogicAND();
+    this->mFunctionMap["or"] = new runtime::LogicOR();
 
+    this->mOperatorMap["+"] = "add";
+    this->mOperatorMap["-"] = "subtract";
+    this->mOperatorMap["*"] = "multiply";
+    this->mOperatorMap["/"] = "divide";
+    this->mOperatorMap["^"] = "xor";
+    this->mOperatorMap["|"] = "or";
+    this->mOperatorMap["&"] = "and";
+}
+
+void parser::Parser::parse(std::vector<token::Token *> program)
+{
     token::Token *currToken;
     token::Token *tokens[program.capacity()];
     std::copy(program.begin(), program.end(), tokens);
@@ -55,9 +71,6 @@ void parser::Parser::parse(std::vector<token::Token *> program)
 
 void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *idx)
 {
-
-    auto tval = tokens[*idx + 1];
-
     try
     {
         this->mVariableMap[tInvoke->mContent] = this->nextVariable(tInvoke, tokens, idx);
@@ -65,7 +78,7 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
     catch (std::exception &err)
     {
         panic(std::string("Invalid assignment at line ")
-                  .append(std::to_string(tval->mLine))
+                  .append(std::to_string(tInvoke->mLine))
                   .append(" -> ")
                   .append(std::string(err.what())),
               tInvoke);
@@ -110,13 +123,15 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tInvoke, token::To
     {
         *idx += 1;
         var = new runtime::String(runtime::STRING, tval->mContent);
-    } else if (tval->mType == token::BOOLEAN) {
+    }
+    else if (tval->mType == token::BOOLEAN)
+    {
         *idx += 1;
-        return new runtime::Boolean(tval->mContent);
+        var = new runtime::Boolean(tval->mContent);
     }
     else if (tval->mType == token::IDENTIFIER)
     {
-        auto toper = tokens[*idx + 1];
+        auto toper = tokens[*idx + 2];
         if (this->mVariableMap.find(tval->mContent) != this->mVariableMap.end())
         {
             *idx += 1;
@@ -124,7 +139,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tInvoke, token::To
         }
         else if (toper->mType == token::OPERATOR && toper->mContent == "(")
         {
-            *idx += 1;
+            *idx += 2;
             var = this->funcionCall(tval, tokens, idx);
         }
     }
@@ -137,32 +152,16 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tInvoke, token::To
         token::Token *potentialOperator = tokens[*idx + 1];
         if (potentialOperator->mType == token::OPERATOR)
         {
-            std::string op;
-            if (potentialOperator->mContent == "+")
-            {
-                op = "add";
-            }
-            else if (potentialOperator->mContent == "*")
-            {
-                op = "multiply";
-            }
-            else if (potentialOperator->mContent == "-")
-            {
-                op = "subtract";
-            }
-            else if (potentialOperator->mContent == "/")
-            {
-                op = "divide";
-            }
-            if (!op.empty())
+            if (this->mOperatorMap.find(potentialOperator->mContent) != this->mOperatorMap.end())
             {
                 *idx += 1;
                 runtime::Variable *secondArg = this->nextVariable(potentialOperator, tokens, idx);
-
-                var = this->mFunctionMap.at(op)->execute(std::vector<runtime::Variable *>{
-                    var,
-                    secondArg,
-                });
+                std::string op = this->mOperatorMap.at(potentialOperator->mContent);
+                var = this->mFunctionMap.at(op)
+                          ->execute(std::vector<runtime::Variable *>{
+                              var,
+                              secondArg,
+                          });
             }
         }
         return var;

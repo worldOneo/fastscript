@@ -86,6 +86,9 @@ namespace fastscript::runtime
         Integer *multiply(Variable *variable);
         Integer *subtract(Variable *variable);
         Integer *divide(Variable *variable);
+        Integer *lor(Variable *);
+        Integer *land(Variable *);
+        Integer *lxor(Variable *);
         Integer(Types type, std::string data);
         Integer(int i);
         Integer();
@@ -102,7 +105,7 @@ namespace fastscript::runtime
         //String *multiply(Variable *variable);
         //String *subtract(Variable *variable);
         //String *divide(Variable *variable);
-        std::string name() { return "string"; }
+        std::string name() { return "String"; }
         String(Types type, std::string data) { this->data = data; };
         std::string to_string();
     };
@@ -124,6 +127,7 @@ namespace fastscript::runtime
         std::string to_string() { return this->value ? "true" : "false"; }
         int as_int() { return this->value; }
         bool getValue() { return this->value; }
+        std::string name() { return "Boolean"; };
         Boolean(std::string value);
         Boolean(bool value);
     };

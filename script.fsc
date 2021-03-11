@@ -14,6 +14,17 @@ clue = "From the numbers 1 and 0"
 print(name);
 print();
 printf("Spoken: {0} ({1})", spoken, clue);
-letres = 10*10*10;
-printf("10*10*10={0}", letres);
+result = 10*10*10;
+printf("10*10*10={0}", result);
+
 printf("True: {0}, False: {1}", true, false);
+boolvar = boolean(true&false);
+printf("True&False = {0}", boolvar);
+printf("True^True = {0}", boolean(true^true));
+printf("False|True = {0}", boolean(false|true));
+printf("255^254 = {0}", 255^254);
+
+printf("True+True={0}", true+true);
+printf("3-True={0}", 3-true);
+
+printf("1+1={0}", 1+1);

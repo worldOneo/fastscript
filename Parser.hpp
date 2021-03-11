@@ -20,11 +20,14 @@ namespace fastscript::parser
     private:
         std::map<std::string, runtime::Variable *> mVariableMap;
         std::map<std::string, runtime::Function *> mFunctionMap;
+        std::map<std::string, std::string> mOperatorMap;
+
         void asign(token::Token *currToken, token::Token *tokens[], int *idx);
         runtime::Variable *funcionCall(token::Token *tInvoke, token::Token *tokens[], int *idx);
         runtime::Variable *nextVariable(token::Token *tInvoke, token::Token *tokens[], int *idx);
 
     public:
+        Parser();
         void parse(std::vector<fastscript::token::Token *> program);
     };
 }
