@@ -57,6 +57,7 @@ parser::Parser::Parser()
 void parser::Parser::parse(std::vector<token::Token *> program)
 {
     token::Token *currToken;
+    token::Token *toper;
     token::Token *tokens[program.capacity()];
     std::copy(program.begin(), program.end(), tokens);
     int index = 0;
@@ -66,7 +67,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
         switch (currToken->mType)
         {
         case token::IDENTIFIER:
-            auto toper = tokens[++index];
+            toper = tokens[++index];
             if (toper->mType == token::OPERATOR)
             {
                 if (toper->mContent == "=")
@@ -77,6 +78,31 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                 {
                     this->funcionCall(currToken, tokens, &index);
                 }
+                break;
+            }
+            break;
+        case token::IFSTMT:
+            toper = tokens[++index];
+            if (toper->mContent != "(")
+            {
+                panic("( after if expected", toper);
+            }
+            auto condition = this->nextVariable(currToken, tokens, &index);
+            auto mathVar = dynamic_cast<runtime::MathVar *>(condition);
+            if (!this->exceptOperator(")", tokens, &index))
+            {
+                panic(") excepted after condition", tokens[index]);
+            }
+            if (!this->exceptOperator("{", tokens, &index))
+            {
+                panic("{} excepted after condition", tokens[index]);
+            }
+            if (!mathVar->as_int())
+            {
+                do
+                {
+                    currToken = tokens[++index];
+                } while (!(currToken->mType == token::OPERATOR && currToken->mContent == "}"));
                 break;
             }
             break;
@@ -182,4 +208,11 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tInvoke, token::To
         }
         return var;
     }
+}
+
+bool parser::Parser::exceptOperator(std::string excepted, token::Token *tokens[], int *idx)
+{
+    *idx += 1;
+    auto curr = tokens[*idx];
+    return curr->mType == token::OPERATOR && curr->mContent == excepted;
 }

@@ -15,7 +15,11 @@ void endToken(std::vector<Token *> &tokenized, Token *&token)
             }
             else if (token->mContent == "if")
             {
-                token->mType == IFSTMT;
+                token->mType = IFSTMT;
+            }
+            else if (token->mContent == "break")
+            {
+                token->mType = BREAK;
             }
         }
         tokenized.push_back(token);

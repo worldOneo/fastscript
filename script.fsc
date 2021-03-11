@@ -35,5 +35,13 @@ printf("1==1 = {0}", 1==1);
 printf("4==5 = {0}", 4==5);
 printf("5<4 = {0}", a);
 printf("4>=4 = {0}", 1>=4);
+ 
+if(true) {
+    print("True value here");
+}
+
+if(false) {
+    print("False value here");
+}
 
 printf("1+1={0}", 1+1);

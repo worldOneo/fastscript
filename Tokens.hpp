@@ -13,6 +13,7 @@ namespace fastscript::token
         OPERATOR,
         BOOLEAN,
         IFSTMT,
+        BREAK,
     };
 
     static const char *T_CANONICAL[] = {
@@ -23,6 +24,7 @@ namespace fastscript::token
         "OPERATOR",
         "BOOLEAN",
         "IFSTMT",
+        "BREAK",
     };
 
     class Token
