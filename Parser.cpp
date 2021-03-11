@@ -78,11 +78,38 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                 {
                     this->funcionCall(currToken, tokens, &index);
                 }
+                else if (toper->mContent == "[")
+                {
+                    if (this->mVariableMap.find(currToken->mContent) == this->mVariableMap.end())
+                        panic("Variable not defined", currToken);
+
+                    runtime::Array *arrayVar = dynamic_cast<runtime::Array *>(
+                        this->mVariableMap[currToken->mContent]);
+
+                    if (!arrayVar)
+                        panic("Invalid access", currToken);
+
+                    runtime::Variable *access = this->nextVariable(tokens, &index);
+
+                    runtime::MathVar *mathVar = dynamic_cast<runtime::MathVar *>(access);
+                    if (!mathVar)
+                        panic("Array access without mathematical var!", toper);
+
+                    int accessIndex = mathVar->as_int();
+
+                    if (!exceptOperator("]", tokens, &index))
+                        panic("] ecepted, unclosed array access", currToken);
+
+                    if (!exceptOperator("=", tokens, &index))
+                        panic("= excepted, unfinished array definition.", currToken);
+                    
+                    runtime::Variable *value = this->nextVariable(tokens, &index);
+                    arrayVar->set_index(accessIndex, value);
+                }
                 break;
             }
             break;
         case token::OPERATOR:
-            // TODO: Jumping on the stack
             if (currToken->mContent == "}" && !this->mStack.empty())
             {
                 std::pair<int, int> poped = this->mStack.at(this->mStack.size() - 1);
@@ -105,7 +132,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
             if (toper->mContent != "(")
                 panic("( after while expected", toper);
 
-            auto condition = this->nextVariable(currToken, tokens, &index);
+            auto condition = this->nextVariable(tokens, &index);
             auto mathVar = dynamic_cast<runtime::MathVar *>(condition);
             if (!mathVar)
                 panic("Value cant be used as boolean.", toper);
@@ -124,8 +151,8 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                 {
                     currToken = tokens[++index];
                 } while (!(currToken->mType == token::OPERATOR && currToken->mContent == "}"));
-                break;
             }
+            delete condition;
         }
         break;
         case token::WHILE:
@@ -135,7 +162,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
             if (toper->mContent != "(")
                 panic("( after while expected", toper);
 
-            auto condition = this->nextVariable(currToken, tokens, &index);
+            auto condition = this->nextVariable(tokens, &index);
             auto mathVar = dynamic_cast<runtime::MathVar *>(condition);
             if (!mathVar)
                 panic("Value cant be used as boolean.", toper);
@@ -152,9 +179,9 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                 {
                     currToken = tokens[++index];
                 } while (!(currToken->mType == token::OPERATOR && currToken->mContent == "}"));
-                break;
             }
 
+            delete condition;
             mBraceCount++;
             mStack.push_back({mBraceCount, --jmp});
         }
@@ -168,7 +195,7 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
 {
     try
     {
-        this->mVariableMap[tInvoke->mContent] = this->nextVariable(tInvoke, tokens, idx);
+        this->mVariableMap[tInvoke->mContent] = this->nextVariable(tokens, idx);
     }
     catch (std::exception &err)
     {
@@ -189,9 +216,8 @@ runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Tok
     {
         while (true)
         {
+            args.push_back(this->nextVariable(tokens, idx));
             token::Token *toper = tokens[*idx + b];
-            args.push_back(this->nextVariable(toper, tokens, idx));
-            toper = tokens[*idx + b];
             if (toper->mType == token::Type::OPERATOR && toper->mContent == ")")
                 break;
             else if (toper->mContent != ",")
@@ -205,7 +231,7 @@ runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Tok
     return this->mFunctionMap.at(tInvoke->mContent)->execute(args);
 }
 
-runtime::Variable *parser::Parser::nextVariable(token::Token *tInvoke, token::Token *tokens[], int *idx)
+runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx)
 {
     auto tval = tokens[*idx + 1];
     runtime::Variable *var = nullptr;
@@ -231,11 +257,43 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tInvoke, token::To
         {
             *idx += 1;
             var = this->mVariableMap.at(tval->mContent);
+            runtime::Array *arrayVar = dynamic_cast<runtime::Array *>(var);
+            if (tokens[*idx + 1]->mType == token::OPERATOR && tokens[*idx + 1]->mContent == "[")
+            {
+                *idx += 1;
+                runtime::Variable *access = this->nextVariable(tokens, idx);
+                runtime::MathVar *mathVar = dynamic_cast<runtime::MathVar *>(access);
+                if (!mathVar)
+                    panic("Array acces without mathematical var!", tval);
+
+                var = arrayVar->get(mathVar->as_int());
+                *idx += 1;
+            }
         }
         else if (toper->mType == token::OPERATOR && toper->mContent == "(")
         {
             *idx += 2;
             var = this->funcionCall(tval, tokens, idx);
+        }
+    }
+    else if (tval->mType == token::OPERATOR)
+    {
+        if (tval->mContent == "[")
+        {
+            runtime::Array *newArray = new runtime::Array();
+            *idx += 1;
+            while (true)
+            {
+                newArray->add(this->nextVariable(tokens, idx));
+
+                if (tokens[*idx + 1]->mType == token::OPERATOR && tokens[*idx + 1]->mContent == "]")
+                    break;
+
+                if (!exceptOperator(",", tokens, idx))
+                    panic(", expected in list constructor", tokens[*idx]);
+            }
+            *idx += 1;
+            var = newArray;
         }
     }
     if (var == nullptr)
@@ -250,7 +308,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tInvoke, token::To
             if (this->mOperatorMap.find(potentialOperator->mContent) != this->mOperatorMap.end())
             {
                 *idx += 1;
-                runtime::Variable *secondArg = this->nextVariable(potentialOperator, tokens, idx);
+                runtime::Variable *secondArg = this->nextVariable(tokens, idx);
                 std::string op = this->mOperatorMap.at(potentialOperator->mContent);
                 var = this->mFunctionMap.at(op)
                           ->execute(std::vector<runtime::Variable *>{

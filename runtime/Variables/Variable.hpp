@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include "stdexcept"
 
 #define panic_throw(msg, v)                    \
@@ -15,6 +16,7 @@ namespace fastscript::runtime
         STRING,
         INTEGER,
         BOOLEAN,
+        ARRAY,
     };
 
     class Variable
@@ -81,7 +83,13 @@ namespace fastscript::runtime
         virtual std::string to_string() { return "to_string not implemented"; };
     };
 
-    class String : public Variable, public StringAble
+    class Sized
+    {
+    public:
+        virtual int get_size() { return 0; };
+    };
+
+    class String : public Variable, public StringAble, public Sized
     {
     protected:
         std::string data;
@@ -93,6 +101,7 @@ namespace fastscript::runtime
         //String *divide(Variable *variable);
         std::string name() { return "String"; }
         String(Types type, std::string data) { this->data = data; };
+        int get_size();
         std::string to_string();
     };
 
@@ -158,5 +167,23 @@ namespace fastscript::runtime
         std::string name() { return "Boolean"; };
         Boolean(std::string value);
         Boolean(bool value);
+    };
+
+    class Array : public Variable, public StringAble, public Sized //, public Comparator
+    {
+    private:
+        size_t size = 16;
+        size_t index = 0;
+        Variable **data = new Variable *[16];
+        void resize();
+
+    public:
+        Variable *add(Variable *var);
+        Variable *get(int i);
+        Variable *set_index(int i, Variable *var);
+        std::string to_string();
+        std::string name() { return "Array"; }
+        int get_size();
+        Array();
     };
 }

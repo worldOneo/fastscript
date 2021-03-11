@@ -14,6 +14,11 @@ namespace fastscript::runtime
         panic_throw("Unable to add string and %s", var);
     }
 
+    int String::get_size()
+    {
+        return this->data.size();
+    }
+
     std::string String::to_string()
     {
         return this->data;

@@ -50,4 +50,14 @@ while(index < 10) {
     index = index+1;
 }
 
+a = [7,15,"3"];
+printf("Array example: {0}", a);
+printf("First element: {0}", a[0]);
+
+b=[0,1,2];
+printf("Complex access: {0}", a[b[1]]);
+
+a[0] = "rewritten";
+printf("The array was {0}", a[0]);
+
 printf("1+1={0}", 1+1);

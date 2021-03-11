@@ -26,7 +26,7 @@ namespace fastscript::parser
 
         void asign(token::Token *currToken, token::Token *tokens[], int *idx);
         runtime::Variable *funcionCall(token::Token *tInvoke, token::Token *tokens[], int *idx);
-        runtime::Variable *nextVariable(token::Token *tInvoke, token::Token *tokens[], int *idx);
+        runtime::Variable *nextVariable(token::Token *tokens[], int *idx);
         bool exceptOperator(std::string excepted, token::Token *tokens[], int *idx);
         bool exceptCondition(token::Token *tokens[], int idx);
 
