@@ -1,91 +1,80 @@
 #include "Variable.hpp"
-#include "stdexcept"
 
-using namespace fastscript::runtime;
-
-Integer::Integer(Types type, std::string data)
+namespace fastscript::runtime
 {
-    if (type != INTEGER)
+    Integer::Integer(Types type, std::string data)
     {
-        throw std::runtime_error("Type INTEGER is required for Variable INTEGER");
+        if (type != INTEGER)
+        {
+            throw std::runtime_error("Type INTEGER is required for Variable INTEGER");
+        }
+        this->mType = INTEGER;
+        this->data = std::stoi(data);
     }
-    this->mType = INTEGER;
-    this->data = std::stoi(data);
-}
 
-Integer::Integer(int i)
-{
-    this->mType = INTEGER;
-    this->data = i;
-}
-
-Integer::Integer()
-{
-    this->mType = INTEGER;
-    this->data = 0;
-}
-
-Variable *Integer::add(Variable *v)
-{
-    Integer *intVar = dynamic_cast<Integer *>(v);
-    if (intVar)
+    Integer::Integer(int i)
     {
-        int i = intVar->getValue();
-        int m = this->getValue();
-        return new Integer(i + m);
+        this->mType = INTEGER;
+        this->data = i;
     }
-    String *stringVar = dynamic_cast<String *>(v);
-    if (stringVar)
-    {
-        return new String(STRING, std::to_string(this->data).append(stringVar->getValue()));
-    }
-    char err[50];
-    std::sprintf(err, "Unable to add integer and %s", v->name().c_str());
-    throw std::runtime_error(std::string(err));
-}
 
-Integer *Integer::multiply(Variable *v)
-{
-    Integer *intVar = dynamic_cast<Integer *>(v);
-    if (intVar)
+    Integer::Integer()
     {
-        int i = intVar->getValue();
-        int m = this->getValue();
-        return new Integer(i * m);
+        this->mType = INTEGER;
+        this->data = 0;
     }
-    char err[50];
-    std::sprintf(err, "Unable to multiply integer and %s", v->name().c_str());
-    throw std::runtime_error(std::string(err));
-}
 
-Integer *Integer::divide(Variable *v)
-{
-    Integer *intVar = dynamic_cast<Integer *>(v);
-    if (intVar)
+    Variable *Integer::add(Variable *v)
     {
-        int i = intVar->getValue();
-        int m = this->getValue();
-        return new Integer(m / i);
+        Integer *intVar = dynamic_cast<Integer *>(v);
+        if (intVar)
+        {
+            return new Integer(intVar->getValue() + this->getValue());
+        }
+        StringAble *stringVar = dynamic_cast<StringAble *>(v);
+        if (stringVar)
+        {
+            return new String(STRING, std::to_string(this->data).append(stringVar->to_string()));
+        }
+        panic_throw("Unable to add integer and %s", v);
     }
-    char err[50];
-    std::sprintf(err, "Unable to divide integer and %s", v->name().c_str());
-    throw std::runtime_error(std::string(err));
-}
 
-Integer *Integer::subtract(Variable *v)
-{
-    Integer *intVar = dynamic_cast<Integer *>(v);
-    if (intVar)
+    Integer *Integer::multiply(Variable *v)
     {
-        int i = intVar->getValue();
-        int m = this->getValue();
-        return new Integer(m - i);
+        Integer *intVar = dynamic_cast<Integer *>(v);
+        if (intVar)
+        {
+            return new Integer(this->getValue() * intVar->getValue());
+        }
+        panic_throw("Unable to multiply integer and %s", v);
     }
-    char err[50];
-    std::sprintf(err, "Unable to subtract integer and %s", v->name().c_str());
-    throw std::runtime_error(std::string(err));
-}
 
-Integer::~Integer()
-{
+    Integer *Integer::divide(Variable *v)
+    {
+        Integer *intVar = dynamic_cast<Integer *>(v);
+        if (intVar)
+        {
+            return new Integer(this->getValue() / intVar->getValue());
+        }
+        panic_throw("Unable to divide integer and %s", v);
+    }
+
+    Integer *Integer::subtract(Variable *v)
+    {
+        Integer *intVar = dynamic_cast<Integer *>(v);
+        if (intVar)
+        {
+            return new Integer(this->getValue() - intVar->getValue());
+        }
+        panic_throw("Unable to subtract integer and %s", v);
+    }
+
+    std::string Integer::to_string()
+    {
+        return std::to_string(this->data);
+    }
+
+    Integer::~Integer()
+    {
+    }
 }

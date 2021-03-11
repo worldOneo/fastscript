@@ -8,3 +8,9 @@ print(age);
 tenYearsLater = 10 + age;
 
 printf("In 10 Years {0} will be {1} years old", name, tenYearsLater);
+
+spoken = "world - one - o";
+clue = "From the numbers 1 and 0"
+print(name);
+print();
+printf("Spoken: {0} ({1})", spoken, clue);

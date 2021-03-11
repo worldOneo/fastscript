@@ -76,18 +76,22 @@ runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Tok
 {
     std::vector<runtime::Variable *> args;
     int b = 1;
-    while (true)
+    token::Token *toper = tokens[*idx + b];
+    if (!(toper->mType == token::Type::OPERATOR && toper->mContent == ")"))
     {
-        token::Token *toper = tokens[*idx + b];
-        args.push_back(this->nextVariable(toper, tokens, idx));
-        toper = tokens[*idx + b];
-        if (toper->mType == token::Type::OPERATOR && toper->mContent == ")")
-            break;
-        else if (toper->mContent != ",")
+        while (true)
         {
-            panic("Unexcepted value!", toper);
+            token::Token *toper = tokens[*idx + b];
+            args.push_back(this->nextVariable(toper, tokens, idx));
+            toper = tokens[*idx + b];
+            if (toper->mType == token::Type::OPERATOR && toper->mContent == ")")
+                break;
+            else if (toper->mContent != ",")
+            {
+                panic("Unexcepted value!", toper);
+            }
+            *idx += 1;
         }
-        *idx += 1;
     }
 
     return this->mFunctionMap.at(tInvoke->mContent)->execute(args);

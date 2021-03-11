@@ -1,29 +1,20 @@
 #include "Variable.hpp"
-#include "stdexcept"
 
 namespace fastscript::runtime
 {
     String *String::add(Variable *var)
     {
-        String *strVar = dynamic_cast<String *>(var);
-        std::string newString = this->getValue();
+        StringAble *strVar = dynamic_cast<StringAble *>(var);
+        std::string newString = this->to_string();
         if (strVar)
         {
-            std::string append = strVar->getValue();
+            std::string append = strVar->to_string();
             return new String(STRING, newString.append(append));
         }
-
-        Integer *intVar = dynamic_cast<Integer *>(var);
-        if (intVar)
-        {
-            return new String(STRING, newString + std::to_string(intVar->getValue()));
-        }
-        char err[50];
-        std::sprintf(err, "Unable to add string and %s", var->name().c_str());
-        throw std::runtime_error(std::string(err));
+        panic_throw("Unable to add string and %s", var);
     }
 
-    std::string String::getValue()
+    std::string String::to_string()
     {
         return this->data;
     }
