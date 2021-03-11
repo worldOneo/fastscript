@@ -16,10 +16,17 @@ void endToken(std::vector<Token *> &tokenized, Token *&token)
             else if (token->mContent == "if")
             {
                 token->mType = IFSTMT;
+                token->mContent.erase();
             }
             else if (token->mContent == "break")
             {
                 token->mType = BREAK;
+                token->mContent.erase();
+            }
+            else if (token->mContent == "while")
+            {
+                token->mType = WHILE;
+                token->mContent.erase();
             }
         }
         tokenized.push_back(token);

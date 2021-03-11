@@ -81,22 +81,71 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                 break;
             }
             break;
+        case token::OPERATOR:
+            // TODO: Jumping on the stack
+            if (currToken->mContent == "}" && !this->mStack.empty())
+            {
+                std::pair<int, int> poped = this->mStack.at(this->mStack.size() - 1);
+                if (poped.first == mBraceCount)
+                {
+                    index = poped.second;
+                    this->mStack.pop_back();
+                }
+                mBraceCount--;
+            }
+            else if (currToken->mContent == "{")
+            {
+                mBraceCount++;
+            }
+            break;
+
         case token::IFSTMT:
+        {
             toper = tokens[++index];
             if (toper->mContent != "(")
-            {
-                panic("( after if expected", toper);
-            }
+                panic("( after while expected", toper);
+
             auto condition = this->nextVariable(currToken, tokens, &index);
             auto mathVar = dynamic_cast<runtime::MathVar *>(condition);
+            if (!mathVar)
+                panic("Value cant be used as boolean.", toper);
+
             if (!this->exceptOperator(")", tokens, &index))
-            {
                 panic(") excepted after condition", tokens[index]);
-            }
+
             if (!this->exceptOperator("{", tokens, &index))
+                panic("{ excepted after condition", tokens[index]);
+
+            mBraceCount++;
+            if (!mathVar->as_int())
             {
-                panic("{} excepted after condition", tokens[index]);
+                mBraceCount--;
+                do
+                {
+                    currToken = tokens[++index];
+                } while (!(currToken->mType == token::OPERATOR && currToken->mContent == "}"));
+                break;
             }
+        }
+        break;
+        case token::WHILE:
+        {
+            int jmp = index;
+            toper = tokens[++index];
+            if (toper->mContent != "(")
+                panic("( after while expected", toper);
+
+            auto condition = this->nextVariable(currToken, tokens, &index);
+            auto mathVar = dynamic_cast<runtime::MathVar *>(condition);
+            if (!mathVar)
+                panic("Value cant be used as boolean.", toper);
+
+            if (!this->exceptOperator(")", tokens, &index))
+                panic(") excepted after condition", tokens[index]);
+
+            if (!this->exceptOperator("{", tokens, &index))
+                panic("{ excepted after condition", tokens[index]);
+
             if (!mathVar->as_int())
             {
                 do
@@ -105,7 +154,11 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                 } while (!(currToken->mType == token::OPERATOR && currToken->mContent == "}"));
                 break;
             }
-            break;
+
+            mBraceCount++;
+            mStack.push_back({mBraceCount, --jmp});
+        }
+        break;
         }
         index++;
     }
