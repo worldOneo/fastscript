@@ -102,7 +102,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
 
                     if (!exceptOperator("=", tokens, &index))
                         panic("= excepted, unfinished array definition.", currToken);
-                    
+
                     runtime::Variable *value = this->nextVariable(tokens, &index);
                     arrayVar->set_index(accessIndex, value);
                 }
@@ -193,9 +193,18 @@ void parser::Parser::parse(std::vector<token::Token *> program)
 
 void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *idx)
 {
+    std::string varName = tInvoke->mContent;
     try
     {
-        this->mVariableMap[tInvoke->mContent] = this->nextVariable(tokens, idx);
+        auto currentVar = this->mVariableMap[varName];
+        bool del = this->mVariableMap.find(varName) != this->mVariableMap.end();
+
+        auto newVar = this->nextVariable(tokens, idx);
+        newVar->setFree(false);
+        this->mVariableMap[varName] = newVar;
+
+        if (del)
+            delete currentVar;
     }
     catch (std::exception &err)
     {
@@ -228,7 +237,13 @@ runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Tok
         }
     }
 
-    return this->mFunctionMap.at(tInvoke->mContent)->execute(args);
+    auto res = this->mFunctionMap.at(tInvoke->mContent)->execute(args);
+
+    for (auto arg : args)
+        if (arg->isFree())
+            delete arg;
+
+    return res;
 }
 
 runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx)
@@ -310,11 +325,19 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
                 *idx += 1;
                 runtime::Variable *secondArg = this->nextVariable(tokens, idx);
                 std::string op = this->mOperatorMap.at(potentialOperator->mContent);
-                var = this->mFunctionMap.at(op)
-                          ->execute(std::vector<runtime::Variable *>{
-                              var,
-                              secondArg,
-                          });
+                auto _var = this->mFunctionMap.at(op)
+                                ->execute(std::vector<runtime::Variable *>{
+                                    var,
+                                    secondArg,
+                                });
+
+                if (secondArg->isFree())
+                    delete secondArg;
+
+                if (var->isFree())
+                    delete var;
+
+                var = _var;
             }
         }
         return var;

@@ -21,6 +21,9 @@ namespace fastscript::runtime
 
     class Variable
     {
+    private:
+        bool free = true;
+
     public:
         virtual Variable *add(Variable *variable)
         {
@@ -42,6 +45,8 @@ namespace fastscript::runtime
         {
             return "undefined";
         };
+        bool isFree() { return this->free; }
+        void setFree(bool val) { this->free = val; }
         Variable(Types type, std::string data);
         Variable();
         virtual ~Variable(){};
