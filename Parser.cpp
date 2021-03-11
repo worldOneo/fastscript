@@ -110,6 +110,9 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tInvoke, token::To
     {
         *idx += 1;
         var = new runtime::String(runtime::STRING, tval->mContent);
+    } else if (tval->mType == token::BOOLEAN) {
+        *idx += 1;
+        return new runtime::Boolean(tval->mContent);
     }
     else if (tval->mType == token::IDENTIFIER)
     {

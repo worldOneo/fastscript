@@ -1,4 +1,5 @@
 #include "Variable.hpp"
+#include "../Utility.hpp"
 
 namespace fastscript::runtime
 {
@@ -28,45 +29,28 @@ namespace fastscript::runtime
     {
         Integer *intVar = dynamic_cast<Integer *>(v);
         if (intVar)
-        {
-            return new Integer(intVar->getValue() + this->getValue());
-        }
+            return new Integer(intVar->as_int() + this->as_int());
+
         StringAble *stringVar = dynamic_cast<StringAble *>(v);
         if (stringVar)
-        {
             return new String(STRING, std::to_string(this->data).append(stringVar->to_string()));
-        }
+
         panic_throw("Unable to add integer and %s", v);
     }
 
     Integer *Integer::multiply(Variable *v)
     {
-        Integer *intVar = dynamic_cast<Integer *>(v);
-        if (intVar)
-        {
-            return new Integer(this->getValue() * intVar->getValue());
-        }
-        panic_throw("Unable to multiply integer and %s", v);
+        return utility::_math_operation(this, v, utility::_math_multiply);
     }
 
     Integer *Integer::divide(Variable *v)
     {
-        Integer *intVar = dynamic_cast<Integer *>(v);
-        if (intVar)
-        {
-            return new Integer(this->getValue() / intVar->getValue());
-        }
-        panic_throw("Unable to divide integer and %s", v);
+        return utility::_math_operation(this, v, utility::_math_divide);
     }
 
     Integer *Integer::subtract(Variable *v)
     {
-        Integer *intVar = dynamic_cast<Integer *>(v);
-        if (intVar)
-        {
-            return new Integer(this->getValue() - intVar->getValue());
-        }
-        panic_throw("Unable to subtract integer and %s", v);
+        return utility::_math_operation(this, v, utility::_math_subtract);
     }
 
     std::string Integer::to_string()

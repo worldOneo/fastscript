@@ -19,17 +19,15 @@ namespace fastscript::runtime
             return nullptr;
         }
 
-        String *stringVar = dynamic_cast<String *>(args[0]);
+        StringAble *stringVar = dynamic_cast<StringAble *>(args[0]);
         if (stringVar)
         {
             std::cout << stringVar->to_string() << std::endl;
             return nullptr;
         }
-
-        Integer *intVar = dynamic_cast<Integer *>(args[0]);
-        if (intVar)
+        else
         {
-            std::cout << intVar->getValue() << std::endl;
+            std::cout << args[0] << std::endl;
         }
         return nullptr;
     }
@@ -60,7 +58,7 @@ namespace fastscript::runtime
                 else
                 {
                     std::ostringstream addr;
-                    addr << &stringVar;
+                    addr << args[i];
                     value.replace(start_pos, replace.length(), addr.str());
                 }
             }

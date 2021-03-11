@@ -14,3 +14,6 @@ clue = "From the numbers 1 and 0"
 print(name);
 print();
 printf("Spoken: {0} ({1})", spoken, clue);
+letres = 10*10*10;
+printf("10*10*10={0}", letres);
+printf("True: {0}, False: {1}", true, false);

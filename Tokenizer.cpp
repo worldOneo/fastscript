@@ -6,7 +6,16 @@ using namespace fastscript::token;
 void endToken(std::vector<Token *> &tokenized, Token *&token)
 {
     if (token->mType != WHITESPACE)
+    {
+        if (token->mType == IDENTIFIER)
+        {
+            if (token->mContent == "true" || token->mContent == "false")
+            {
+                token->mType = BOOLEAN;
+            }
+        }
         tokenized.push_back(token);
+    }
     else
         delete token;
     token = new Token();
@@ -47,7 +56,8 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
                 token->mContent.push_back(curr);
                 break;
             }
-            if (token->mType == OPERATOR) {
+            if (token->mType == OPERATOR)
+            {
                 endToken(tokenized, token);
                 token->mLine = lineCount;
             }

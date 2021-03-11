@@ -11,6 +11,7 @@ namespace fastscript::token
         IDENTIFIER,
         STRING,
         OPERATOR,
+        BOOLEAN,
     };
 
     static const char *T_CANONICAL[] = {
@@ -18,7 +19,8 @@ namespace fastscript::token
         "INTEGER",
         "IDENTIFIER",
         "STRING",
-        "OPERATOR"
+        "OPERATOR",
+        "BOOLEAN"
     };
 
     class Token

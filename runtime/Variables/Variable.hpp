@@ -13,7 +13,8 @@ namespace fastscript::runtime
     enum Types
     {
         STRING,
-        INTEGER
+        INTEGER,
+        BOOLEAN,
     };
 
     class Variable
@@ -45,13 +46,34 @@ namespace fastscript::runtime
         Types mType;
     };
 
+    class MathVar : public Variable
+    {
+    public:
+        virtual Variable *lor(Variable *variable)
+        {
+            panic_throw("OR not implemented for %s", this);
+        };
+        virtual Variable *land(Variable *variable)
+        {
+            panic_throw("AND not implemented for %s", this);
+        };
+        virtual Variable *lxor(Variable *variable)
+        {
+            panic_throw("XOR not implemented for %s", this);
+        };
+        virtual int as_int()
+        {
+            return 0;
+        };
+    };
+
     class StringAble
     {
     public:
-        virtual std::string to_string() { return "to_string not implemented";};
+        virtual std::string to_string() { return "to_string not implemented"; };
     };
 
-    class Integer : public Variable, public StringAble
+    class Integer : public MathVar, public StringAble
     {
     protected:
         int data;
@@ -59,7 +81,7 @@ namespace fastscript::runtime
     public:
         std::string name() { return "Integer"; }
         std::string to_string();
-        int getValue() { return this->data; };
+        int as_int() { return this->data; }
         Variable *add(Variable *variable);
         Integer *multiply(Variable *variable);
         Integer *subtract(Variable *variable);
@@ -83,5 +105,26 @@ namespace fastscript::runtime
         std::string name() { return "string"; }
         String(Types type, std::string data) { this->data = data; };
         std::string to_string();
+    };
+
+    class Boolean : public MathVar, public StringAble
+    {
+    protected:
+        bool value;
+
+    public:
+        Integer *lor(Variable *);
+        Integer *land(Variable *);
+        Integer *lxor(Variable *);
+        Integer *add(Variable *variable);
+        Integer *multiply(Variable *variable);
+        Integer *subtract(Variable *variable);
+        Integer *divide(Variable *variable);
+        //Integer *lnot();
+        std::string to_string() { return this->value ? "true" : "false"; }
+        int as_int() { return this->value; }
+        bool getValue() { return this->value; }
+        Boolean(std::string value);
+        Boolean(bool value);
     };
 }
