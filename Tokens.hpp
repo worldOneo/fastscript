@@ -15,6 +15,8 @@ namespace fastscript::token
         IFSTMT,
         BREAK,
         WHILE,
+        ELSE,
+        CONTINUE,
     };
 
     static const char *T_CANONICAL[] = {
@@ -27,6 +29,8 @@ namespace fastscript::token
         "IFSTMT",
         "BREAK",
         "WHILE",
+        "ELSE",
+        "CONTINUE"
     };
 
     class Token

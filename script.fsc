@@ -14,65 +14,72 @@ clue = "From the numbers 1 and 0"
 print(name);
 print();
 printf("Spoken: {0} ({1})", spoken, clue);
-result = 10*10*10;
+result = 10 * 10 * 10;
 printf("10*10*10={0}", result);
 
 printf("True: {0}, False: {1}", true, false);
-boolvar = boolean(true&false);
+boolvar = boolean(true & false);
 printf("True&False = {0}", boolvar);
-printf("True^True = {0}", boolean(true^true));
-printf("False|True = {0}", boolean(false|true));
-printf("255^254 = {0}", 255^254);
+printf("True^True = {0}", boolean(true ^ true));
+printf("False|True = {0}", boolean(false | true));
+printf("255^254 = {0}", 255 ^ 254);
 
-printf("True+True={0}", true+true);
-printf("3-True={0}", 3-true);
+printf("True+True={0}", true + true);
+printf("3-True={0}", 3 - true);
 
-printf("1<<24={0}", 1<<24);
-printf("24>>2={0}", 24>>2);
+printf("1<<24={0}", 1 << 24);
+printf("24>>2={0}", 24 >> 2);
 
 a = 5 < 4;
-printf("1==1 = {0}", 1==1);
-printf("4==5 = {0}", 4==5);
+printf("1==1 = {0}", 1 == 1);
+printf("4==5 = {0}", 4 == 5);
 printf("5<4 = {0}", a);
-printf("4>=4 = {0}", 1>=4);
- 
-if(true) {
+printf("4>=4 = {0}", 1 >= 4);
+
+if (true) {
     print("True value here");
 }
 
-if(false) {
-    print("False value here");
-}
 
-number = 10%3;
+printf("cand(true, false): {0}, cand(true, true): {1}, cand(false, false}: {2}", cand(true, false), cand(true, true), cand(false, false));
+
+
+number = 10 % 3;
 printf("10%3 = {0}", number)
 
 index = 0;
-while(index < 100) {
+while (index < 100) {
+    if (index > 15 && index < 30) {
+        printf("Skipping {0}", index);
+        index = index + 1;
+        continue;
+    }
     printf("Counting game: {0}", index);
 
-    if(index%3 == 0) {
+    index = index + 1;
+
+    if (index % 3 == 0) {
         printf("Foo");
     }
-    if(index%5 == 0) {
+    if (index % 5 == 0) {
         printf("Bar");
     }
-    if(index == 15) {
-        if(index+1 == 16) {
+
+    if (index == 31) {
+        if (index + 1 == 32) {
             break;
         }
     }
-    index = index+1;
 }
 
-a = [7,15,"3"];
+a = [7, 15, "3"];
 printf("Array example: {0}", a);
 printf("First element: {0}", a[0]);
 
-b=[0,1,2];
+b = [0, 1, 2];
 printf("Complex access: {0}", a[b[1]]);
 
 a[0] = "rewritten";
 printf("The array was {0}", a[0]);
 
-printf("1+1={0}", 1+1);
+printf("1+1={0}", 1 + 1);

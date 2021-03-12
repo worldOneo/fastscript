@@ -28,6 +28,11 @@ void endToken(std::vector<Token *> &tokenized, Token *&token)
                 token->mType = WHILE;
                 token->mContent.erase();
             }
+            else if (token->mContent == "continue")
+            {
+                token->mType = CONTINUE;
+                token->mContent.erase();
+            }
         }
         tokenized.push_back(token);
     }
@@ -116,7 +121,9 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
                     (curr == '=' && token->mContent == ">") ||
                     (curr == '=' && token->mContent == "<") ||
                     (curr == '<' && token->mContent == "<") ||
-                    (curr == '>' && token->mContent == ">"))
+                    (curr == '>' && token->mContent == ">") ||
+                    (curr == '&' && token->mContent == "&") ||
+                    (curr == '|' && token->mContent == "|"))
                 {
                     token->mContent.append(sizeof(curr), curr);
                     break;

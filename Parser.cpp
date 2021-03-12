@@ -48,6 +48,8 @@ parser::Parser::Parser()
     this->mFunctionMap["lt"] = new runtime::LogicLT();
     this->mFunctionMap["gteq"] = new runtime::LogicGTEQ();
     this->mFunctionMap["lteq"] = new runtime::LogicLTEQ();
+    this->mFunctionMap["cand"] = new runtime::CondAND();
+    this->mFunctionMap["cor"] = new runtime::CondOR();
 
     //Symbol-mapping
     this->mOperatorMap["+"] = "add";
@@ -67,6 +69,9 @@ parser::Parser::Parser()
     this->mComparatorMap["<"] = "lt";
     this->mComparatorMap["<="] = "lteq";
     this->mComparatorMap[">="] = "gteq";
+
+    this->mCondBitwiseMap["&&"] = "cand";
+    this->mCondBitwiseMap["||"] = "cor";
 }
 
 void parser::Parser::parse(std::vector<token::Token *> program)
@@ -204,6 +209,13 @@ void parser::Parser::parse(std::vector<token::Token *> program)
             skipScope(tokens, &index);
         }
         break;
+        case token::CONTINUE:
+        {
+            std::pair<int, int> poped = this->mStack.at(this->mStack.size() - 1);
+            this->mStack.pop_back();
+            index = poped.second;
+        }
+        break;
         }
         index++;
     }
@@ -255,6 +267,9 @@ runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Tok
         }
     }
 
+    if (!exceptOperator(")", tokens, idx))
+        panic(") excepted after arguements of function call", tokens[*idx]);
+
     auto res = this->mFunctionMap.at(tInvoke->mContent)->execute(args);
 
     for (auto arg : args)
@@ -271,10 +286,11 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
 
 runtime::Variable *parser::Parser::evaluateMapOperation(std::map<std::string, std::string> operationMap,
                                                         int *idx, token::Token *potentialOperator,
-                                                        token::Token *tokens[], runtime::Variable *var)
+                                                        token::Token *tokens[], runtime::Variable *var,
+                                                        bool allowComparison)
 {
     *idx += 1;
-    runtime::Variable *secondArg = this->nextVariable(tokens, idx, false);
+    runtime::Variable *secondArg = this->nextVariable(tokens, idx, allowComparison);
     std::string op = operationMap.at(potentialOperator->mContent);
     auto _var = this->mFunctionMap.at(op)
                     ->execute(std::vector<runtime::Variable *>{
@@ -367,16 +383,25 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
         {
             if (this->mOperatorMap.find(potentialOperator->mContent) != this->mOperatorMap.end())
             {
-                var = evaluateMapOperation(this->mOperatorMap, idx, potentialOperator, tokens, var);
+                var = evaluateMapOperation(this->mOperatorMap, idx, potentialOperator, tokens, var, false);
             }
+        }
 
-            token::Token *potentialComparator = tokens[*idx + 1];
-            if (potentialComparator->mType == token::OPERATOR && allowComparison)
+        token::Token *potentialComparator = tokens[*idx + 1];
+        if (potentialComparator->mType == token::OPERATOR && allowComparison)
+        {
+            if (this->mComparatorMap.find(potentialComparator->mContent) != this->mComparatorMap.end())
             {
-                if (this->mComparatorMap.find(potentialComparator->mContent) != this->mComparatorMap.end())
-                {
-                    var = evaluateMapOperation(this->mComparatorMap, idx, potentialComparator, tokens, var);
-                }
+                var = evaluateMapOperation(this->mComparatorMap, idx, potentialComparator, tokens, var, false);
+            }
+        }
+
+        token::Token *bitwiseCond = tokens[*idx + 1];
+        if (bitwiseCond->mType == token::OPERATOR && allowComparison)
+        {
+            if (this->mCondBitwiseMap.find(bitwiseCond->mContent) != this->mCondBitwiseMap.end())
+            {
+                var = evaluateMapOperation(this->mCondBitwiseMap, idx, bitwiseCond, tokens, var, true);
             }
         }
         return var;

@@ -74,4 +74,18 @@ namespace fastscript::runtime
         MathVar *mathVar = ensure_mathvar(args.at(0));
         return mathVar->modulo(args.at(1));
     }
+
+    Variable *CondAND::execute(std::vector<Variable *> args)
+    {
+        MathVar *mathVar1 = ensure_mathvar(args.at(0));
+        MathVar *mathVar2 = ensure_mathvar(args.at(1));
+        return new Boolean(mathVar1->as_int() && mathVar2->as_int());
+    }
+
+    Variable *CondOR::execute(std::vector<Variable *> args)
+    {
+        MathVar *mathVar1 = ensure_mathvar(args.at(0));
+        MathVar *mathVar2 = ensure_mathvar(args.at(1));
+        return new Boolean(mathVar1->as_int() || mathVar2->as_int());
+    }
 }

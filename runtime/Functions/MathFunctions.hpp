@@ -11,5 +11,7 @@ namespace fastscript::runtime {
     function_with_name(LogicAND);
     function_with_name(LogicRSHFT);
     function_with_name(LogicLSHFT);
+    function_with_name(CondAND);
+    function_with_name(CondOR);
     function_with_name(AsBoolean);
 }
