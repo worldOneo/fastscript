@@ -3,7 +3,7 @@
 
 #define _math_shortdefinition(x, y)        \
     template <typename V>                  \
-    _result<V> _math_##x()                 \
+    _result<V, V> _math_##x()              \
     {                                      \
         return [](V a, V b) { return y; }; \
     }
@@ -12,6 +12,9 @@ namespace fastscript::runtime::utility
 {
     template <typename operator_type>
     using math_operator = operator_type (*)(operator_type, operator_type);
+
+    template <typename operator_type, typename custom_return>
+    using math_operatorz = custom_return (*)(operator_type, operator_type);
 
     template <typename resolved>
     using resolver = resolved (*)(Variable *);
@@ -30,8 +33,14 @@ namespace fastscript::runtime::utility
         return (*oper)((*res)(var1), (*res)(var2));
     }
 
-    template <typename T>
-    using _result = T (*)(T, T);
+    template <typename V1, typename T, typename Z>
+    Z _math_operationz(V1 *var1, Variable *var2, math_operatorz<T, Z> oper, resolver<T> res)
+    {
+        return (*oper)((*res)(var1), (*res)(var2));
+    }
+
+    template <typename T, typename Z>
+    using _result = Z (*)(T, T);
 
     _math_shortdefinition(xor, a ^ b);
     _math_shortdefinition(and, a &b);

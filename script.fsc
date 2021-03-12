@@ -96,3 +96,8 @@ print("Countdown is over!");
 
 printf("Double devision by int: 1/3 = {0}", 1. / 3); "The 1. means its a double without the '.' it would be an integer."
 printf("Double comparison: 1.56 > 1.55 = {0}", 1.56 > 1.55);
+
+printf("'asd'=='asd': {0}", "asd" == "asd");
+printf("'asd'=='asf': {0}", "asd" == "asf");
+printf("'Hello' > 'World': {0}", "Hello" > "World");
+printf("'Hello' < 'World': {0}", "Hello" < "World");

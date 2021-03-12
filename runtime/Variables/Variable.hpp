@@ -98,22 +98,6 @@ namespace fastscript::runtime
         virtual int get_size() { return 0; };
     };
 
-    class String : public Variable, public StringAble, public Sized
-    {
-    protected:
-        std::string data;
-
-    public:
-        String *add(Variable *variable);
-        //String *multiply(Variable *variable);
-        //String *subtract(Variable *variable);
-        //String *divide(Variable *variable);
-        std::string name() { return "String"; }
-        String(Types type, std::string data) { this->data = data; };
-        int get_size();
-        std::string to_string();
-    };
-
     class Boolean;
 
     class Comparator
@@ -122,6 +106,22 @@ namespace fastscript::runtime
         virtual Boolean *greater(Variable *variable) { return nullptr; };
         virtual Boolean *less(Variable *variable) { return nullptr; };
         virtual Boolean *equals(Variable *variable) { return nullptr; };
+    };
+
+    class String : public Variable, public StringAble, public Sized, public Comparator
+    {
+    protected:
+        std::string data;
+
+    public:
+        String *add(Variable *variable);
+        Boolean *greater(Variable *variable);
+        Boolean *less(Variable *variable);
+        Boolean *equals(Variable *variable);
+        std::string name() { return "String"; }
+        String(Types type, std::string data) { this->data = data; };
+        int get_size();
+        std::string to_string();
     };
 
     class Integer : public MathVar, public StringAble, public Comparator
