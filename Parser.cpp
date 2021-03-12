@@ -29,7 +29,7 @@ parser::Parser::Parser()
     this->mFunctionMap["boolean"] = new runtime::AsBoolean();
     this->mFunctionMap["input"] = new runtime::Input();
     this->mFunctionMap["integer"] = new runtime::AsInteger();
-
+    this->mFunctionMap["double"] = new runtime::AsDouble();
 
     //Math
     this->mFunctionMap["add"] = new runtime::Add();
@@ -328,6 +328,11 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
     {
         *idx += 1;
         var = new runtime::Boolean(tval->mContent);
+    }
+    else if (tval->mType == token::DOUBLE)
+    {
+        *idx += 1;
+        var = new runtime::Double(tval->mContent);
     }
     else if (tval->mType == token::IDENTIFIER)
     {

@@ -65,23 +65,47 @@ namespace fastscript::runtime
 
     Variable *AsBoolean::execute(std::vector<Variable *> args)
     {
-        MathVar *mathVar = ensure_mathvar(args.at(0));
-        return new Boolean(mathVar->as_int());
+        MathVar *mathVar = dynamic_cast<MathVar *>(args.at(0));
+        if (mathVar)
+        {
+            return new Boolean(mathVar->as_int());
+        }
+        StringAble *stringVar = dynamic_cast<StringAble *>(args.at(0));
+        if (stringVar)
+        {
+            return new Boolean(stringVar->to_string() == "true");
+        }
+        panic_throw("Varible %s cant be converted to Boolean", args.at(0));
     }
 
     Variable *AsInteger::execute(std::vector<Variable *> args)
     {
         MathVar *mathVar = dynamic_cast<MathVar *>(args.at(0));
         if (mathVar)
-        {
             return new Integer(mathVar->as_int());
-        }
+
         StringAble *stringVar = dynamic_cast<StringAble *>(args.at(0));
         if (stringVar)
-        {
             return new Integer(std::stoi(stringVar->to_string()));
-        }
+
         panic_throw("Varible %s cant be converted to Integer", args.at(0));
+    }
+
+    Variable *AsDouble::execute(std::vector<Variable *> args)
+    {
+        Double *doubleVar = dynamic_cast<Double *>(args.at(0));
+        if (doubleVar)
+            return new Double(doubleVar->getValue());
+
+        MathVar *mathVar = dynamic_cast<MathVar *>(args.at(0));
+        if (mathVar)
+            return new Double(mathVar->as_int());
+
+        StringAble *stringVar = dynamic_cast<StringAble *>(args.at(0));
+        if (stringVar)
+            return new Double(std::stod(stringVar->to_string()));
+
+        panic_throw("Varible %s cant be converted to Double", args.at(0));
     }
 
     Variable *Modulo::execute(std::vector<Variable *> args)

@@ -15,4 +15,5 @@ namespace fastscript::runtime {
     function_with_name(CondOR);
     function_with_name(AsBoolean);
     function_with_name(AsInteger);
+    function_with_name(AsDouble);
 }

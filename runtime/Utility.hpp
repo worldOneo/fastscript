@@ -1,26 +1,51 @@
-#pragma once
 #include <stddef.h>
 #include "Variables/Variable.hpp"
 
+#define _math_shortdefinition(x, y)        \
+    template <typename V>                  \
+    _result<V> _math_##x()                 \
+    {                                      \
+        return [](V a, V b) { return y; }; \
+    }
+
 namespace fastscript::runtime::utility
 {
-    typedef int (*_math_operator)(int, int);
+    template <typename operator_type>
+    using math_operator = operator_type (*)(operator_type, operator_type);
 
-    int _math_operation(MathVar *var1, Variable *var2, _math_operator oper);
+    template <typename resolved>
+    using resolver = resolved (*)(Variable *);
 
-    int _math_xor(int a, int b);
-    int _math_or(int a, int b);
-    int _math_and(int a, int b);
-    int _math_rshft(int a, int b);
-    int _math_lshft(int a, int b);
+    int intResolver(Variable *Variable);
 
-    int _math_eq(int a, int b);
-    int _math_gt(int a, int b);
-    int _math_lt(int a, int b);
+    template <typename V1, typename T>
+    T _math_operation(V1 *var1, Variable *var2, math_operator<T> oper)
+    {
+        return (*oper)(intResolver(var1), intResolver(var2));
+    }
 
-    int _math_add(int a, int b);
-    int _math_subtract(int a, int b);
-    int _math_divide(int a, int b);
-    int _math_multiply(int a, int b);
-    int _math_modulo(int a, int b);
+    template <typename V1, typename T>
+    T _math_operation(V1 *var1, Variable *var2, math_operator<T> oper, resolver<T> res)
+    {
+        return (*oper)((*res)(var1), (*res)(var2));
+    }
+
+    template <typename T>
+    using _result = T (*)(T, T);
+
+    _math_shortdefinition(xor, a ^ b);
+    _math_shortdefinition(and, a &b);
+    _math_shortdefinition(or, a | b);
+    _math_shortdefinition(lshft, a << b);
+    _math_shortdefinition(rshft, a >> b);
+
+    _math_shortdefinition(eq, (V)(a == b));
+    _math_shortdefinition(gt, (V)(a > b));
+    _math_shortdefinition(lt, (V)(a < b));
+
+    _math_shortdefinition(add, a + b);
+    _math_shortdefinition(subtract, a - b);
+    _math_shortdefinition(divide, a / b);
+    _math_shortdefinition(multiply, a *b);
+    _math_shortdefinition(modulo, a % b);
 }

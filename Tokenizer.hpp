@@ -15,7 +15,7 @@ namespace fastscript::token
         IFSTMT,
         BREAK,
         WHILE,
-        ELSE,
+        DOUBLE,
         CONTINUE,
     };
 
@@ -29,7 +29,7 @@ namespace fastscript::token
         "IFSTMT",
         "BREAK",
         "WHILE",
-        "ELSE",
+        "DOUBLE",
         "CONTINUE"
     };
 

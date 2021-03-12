@@ -24,7 +24,6 @@ namespace fastscript::runtime
     {
         std::ostringstream out;
         out << this->get_size() << " :[ ";
-        int a = 0;
         for (int a = 0; a < this->get_size(); a++)
         {
             auto variable = this->data[a];

@@ -1,4 +1,4 @@
-#include "Tokens.hpp"
+#include "Tokenizer.hpp"
 #include "iostream"
 
 using namespace fastscript::token;
@@ -71,7 +71,7 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
             break;
 
         case '0' ... '9':
-            if (token->mType == IDENTIFIER || token->mType == STRING)
+            if (token->mType == IDENTIFIER || token->mType == STRING || token->mType == DOUBLE)
             {
                 token->mContent.push_back(curr);
                 break;
@@ -127,6 +127,24 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
                 {
                     token->mContent.append(sizeof(curr), curr);
                     break;
+                }
+            }
+            if (token->mType == INTEGER)
+            {
+                if (curr == '.')
+                {
+                    if (token->mContent.find('.') == std::string::npos)
+                    {
+                        token->mType = DOUBLE;
+                        token->mContent.append(sizeof(curr), curr);
+                        break;
+                    }
+                    else
+                    {
+                        std::string err = std::string("Cant tokenize double value at line: ")
+                                              .append(std::to_string(token->mLine));
+                        throw std::runtime_error(err);
+                    }
                 }
             }
             endToken(tokenized, token);

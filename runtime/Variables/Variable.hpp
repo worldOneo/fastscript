@@ -180,6 +180,30 @@ namespace fastscript::runtime
         Boolean(bool value);
     };
 
+    class Double : public MathVar, public StringAble, public Comparator
+    {
+    protected:
+        double data;
+
+    public:
+        Variable *add(Variable *);
+        Double *multiply(Variable *);
+        Double *subtract(Variable *);
+        Double *divide(Variable *);
+        Boolean *greater(Variable *);
+        Boolean *less(Variable *);
+        Boolean *equals(Variable *);
+        Double *modulo(Variable *);
+        //Integer *lnot();
+        std::string to_string();
+        int as_int() { return this->data; }
+        double getValue() { return this->data; }
+        std::string name() { return "Double"; };
+        Double(std::string value);
+        Double(double value);
+        ~Double();
+    };
+
     class Array : public Variable, public StringAble, public Sized //, public Comparator
     {
     private:

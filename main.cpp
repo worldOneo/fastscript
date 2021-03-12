@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Tokens.hpp"
+#include "Tokenizer.hpp"
 #include "Parser.hpp"
 
 using namespace fastscript;
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
         size_t fileSize = ftell(fh);
         fseek(fh, 0, SEEK_SET);
         std::string fileContents(fileSize, ' ');
-        fread(fileContents.data(), 1, fileSize, fh);
+        fread((void*)fileContents.data(), 1, fileSize, fh);
 
         token::Tokenizer tokenizer;
         std::vector<token::Token *> tokens = tokenizer.parse(fileContents);
