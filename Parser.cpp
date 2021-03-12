@@ -8,50 +8,65 @@
 
 using namespace fastscript;
 
-void panic(std::string str, token::Token *tval)
+void printToken(token::Token *tval)
 {
     std::cout << token::T_CANONICAL[tval->mType]
               << " " << tval->mContent << " line: "
               << tval->mLine << std::endl;
+}
+
+void panic(std::string str, token::Token *tval)
+{
+    printToken(tval);
     throw std::runtime_error(str);
 }
 
 parser::Parser::Parser()
 {
+    //util
     this->mFunctionMap["print"] = new runtime::PrintFunction();
     this->mFunctionMap["printf"] = new runtime::PrintFormatedFunction();
     this->mFunctionMap["boolean"] = new runtime::AsBoolean();
 
+    //Math
     this->mFunctionMap["add"] = new runtime::Add();
     this->mFunctionMap["subtract"] = new runtime::Subtract();
     this->mFunctionMap["multiply"] = new runtime::Multiply();
     this->mFunctionMap["divide"] = new runtime::Divide();
+    this->mFunctionMap["modulo"] = new runtime::Modulo();
+
+    //Bit-Math
     this->mFunctionMap["xor"] = new runtime::LogicXOR();
     this->mFunctionMap["and"] = new runtime::LogicAND();
     this->mFunctionMap["or"] = new runtime::LogicOR();
     this->mFunctionMap["rshft"] = new runtime::LogicRSHFT();
     this->mFunctionMap["lshft"] = new runtime::LogicLSHFT();
+
+    //Comparison
     this->mFunctionMap["equal"] = new runtime::LogicEQ();
     this->mFunctionMap["gt"] = new runtime::LogicGT();
     this->mFunctionMap["lt"] = new runtime::LogicLT();
     this->mFunctionMap["gteq"] = new runtime::LogicGTEQ();
     this->mFunctionMap["lteq"] = new runtime::LogicLTEQ();
 
+    //Symbol-mapping
     this->mOperatorMap["+"] = "add";
     this->mOperatorMap["-"] = "subtract";
     this->mOperatorMap["*"] = "multiply";
     this->mOperatorMap["/"] = "divide";
+    this->mOperatorMap["%"] = "modulo";
     this->mOperatorMap["^"] = "xor";
     this->mOperatorMap["|"] = "or";
     this->mOperatorMap["&"] = "and";
     this->mOperatorMap["<<"] = "lshft";
     this->mOperatorMap[">>"] = "rshft";
     this->mOperatorMap[">>"] = "rshft";
-    this->mOperatorMap["=="] = "equal";
-    this->mOperatorMap[">"] = "gt";
-    this->mOperatorMap["<"] = "lt";
-    this->mOperatorMap["<="] = "lteq";
-    this->mOperatorMap[">="] = "gteq";
+
+    this->mComparatorMap["=="] = "equal";
+    this->mComparatorMap[">"] = "gt";
+    this->mComparatorMap["<"] = "lt";
+    this->mComparatorMap["<="] = "lteq";
+    this->mComparatorMap[">="] = "gteq";
 }
 
 void parser::Parser::parse(std::vector<token::Token *> program)
@@ -181,6 +196,14 @@ void parser::Parser::parse(std::vector<token::Token *> program)
             mStack.push_back({mBraceCount, --jmp});
         }
         break;
+        case token::BREAK:
+        {
+            std::pair<int, int> poped = this->mStack.at(this->mStack.size() - 1);
+            this->mStack.pop_back();
+            this->mBraceCount = poped.first + (mBraceCount - poped.first);
+            skipScope(tokens, &index);
+        }
+        break;
         }
         index++;
     }
@@ -242,6 +265,33 @@ runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Tok
 }
 
 runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx)
+{
+    return this->nextVariable(tokens, idx, true);
+}
+
+runtime::Variable *parser::Parser::evaluateMapOperation(std::map<std::string, std::string> operationMap,
+                                                        int *idx, token::Token *potentialOperator,
+                                                        token::Token *tokens[], runtime::Variable *var)
+{
+    *idx += 1;
+    runtime::Variable *secondArg = this->nextVariable(tokens, idx, false);
+    std::string op = operationMap.at(potentialOperator->mContent);
+    auto _var = this->mFunctionMap.at(op)
+                    ->execute(std::vector<runtime::Variable *>{
+                        var,
+                        secondArg,
+                    });
+
+    if (secondArg->isFree())
+        delete secondArg;
+
+    if (var->isFree())
+        delete var;
+
+    return _var;
+}
+
+runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx, bool allowComparison)
 {
     auto tval = tokens[*idx + 1];
     runtime::Variable *var = nullptr;
@@ -317,22 +367,16 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
         {
             if (this->mOperatorMap.find(potentialOperator->mContent) != this->mOperatorMap.end())
             {
-                *idx += 1;
-                runtime::Variable *secondArg = this->nextVariable(tokens, idx);
-                std::string op = this->mOperatorMap.at(potentialOperator->mContent);
-                auto _var = this->mFunctionMap.at(op)
-                                ->execute(std::vector<runtime::Variable *>{
-                                    var,
-                                    secondArg,
-                                });
+                var = evaluateMapOperation(this->mOperatorMap, idx, potentialOperator, tokens, var);
+            }
 
-                if (secondArg->isFree())
-                    delete secondArg;
-
-                if (var->isFree())
-                    delete var;
-
-                var = _var;
+            token::Token *potentialComparator = tokens[*idx + 1];
+            if (potentialComparator->mType == token::OPERATOR && allowComparison)
+            {
+                if (this->mComparatorMap.find(potentialComparator->mContent) != this->mComparatorMap.end())
+                {
+                    var = evaluateMapOperation(this->mComparatorMap, idx, potentialComparator, tokens, var);
+                }
             }
         }
         return var;
@@ -357,16 +401,5 @@ void parser::Parser::skipScope(token::Token *tokens[], int *idx)
         cnt += (currToken->mType == token::OPERATOR) *
                ((currToken->mContent == "{") +
                 (-(currToken->mContent == "}")));
-        /*if (currToken->mType == token::OPERATOR)
-        {
-            if (currToken->mContent == "{")
-            {
-                cnt++;
-            }
-            else if (currToken->mContent == "}")
-            {
-                cnt--;
-            }
-        }*/
     } while (cnt != mBraceCount);
 }

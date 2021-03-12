@@ -44,13 +44,25 @@ if(false) {
     print("False value here");
 }
 
+number = 10%3;
+printf("10%3 = {0}", number)
+
 index = 0;
-while(index < 10) {
-    index = index+1;
-    if(index == 5) {
+while(index < 100) {
+    printf("Counting game: {0}", index);
+
+    if(index%3 == 0) {
+        printf("Foo");
+    }
+    if(index%5 == 0) {
         printf("Bar");
     }
-    printf("Counting game: {0}", index);
+    if(index == 15) {
+        if(index+1 == 16) {
+            break;
+        }
+    }
+    index = index+1;
 }
 
 a = [7,15,"3"];

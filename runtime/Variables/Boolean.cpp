@@ -40,6 +40,11 @@ namespace fastscript::runtime
         return new Integer(utility::_math_operation(this, var, utility::_math_or));
     }
 
+    Integer *Boolean::modulo(Variable *v)
+    {
+        return new Integer(utility::_math_operation(this, v, utility::_math_modulo));
+    }
+
     Integer *Boolean::add(Variable *v)
     {
         return new Integer(utility::_math_operation(this, v, utility::_math_add));

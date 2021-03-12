@@ -22,4 +22,5 @@ namespace fastscript::runtime::utility
     int _math_subtract(int a, int b);
     int _math_divide(int a, int b);
     int _math_multiply(int a, int b);
+    int _math_modulo(int a, int b);
 }

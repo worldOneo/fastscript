@@ -38,6 +38,11 @@ namespace fastscript::runtime
         panic_throw("Unable to add integer and %s", v);
     }
 
+    Integer *Integer::modulo(Variable *v)
+    {
+        return new Integer(utility::_math_operation(this, v, utility::_math_modulo));
+    }
+
     Integer *Integer::multiply(Variable *v)
     {
         return new Integer(utility::_math_operation(this, v, utility::_math_multiply));

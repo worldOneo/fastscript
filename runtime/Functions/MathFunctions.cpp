@@ -68,4 +68,10 @@ namespace fastscript::runtime
         MathVar *mathVar = ensure_mathvar(args.at(0));
         return new Boolean(mathVar->as_int());
     }
+
+    Variable *Modulo::execute(std::vector<Variable *> args)
+    {
+        MathVar *mathVar = ensure_mathvar(args.at(0));
+        return mathVar->modulo(args.at(1));
+    }
 }

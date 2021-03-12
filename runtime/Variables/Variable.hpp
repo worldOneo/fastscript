@@ -41,6 +41,10 @@ namespace fastscript::runtime
         {
             panic_throw("Divide not implemented for %s", this);
         };
+        virtual Variable *modulo(Variable *variable)
+        {
+            panic_throw("Modulo not implemented for %s", this);
+        }
         virtual std::string name()
         {
             return "undefined";
@@ -129,18 +133,19 @@ namespace fastscript::runtime
         std::string name() { return "Integer"; }
         std::string to_string();
         int as_int() { return this->data; }
-        Variable *add(Variable *variable);
-        Integer *multiply(Variable *variable);
-        Integer *subtract(Variable *variable);
-        Integer *divide(Variable *variable);
+        Variable *add(Variable *);
+        Integer *modulo(Variable *);
+        Integer *multiply(Variable *);
+        Integer *subtract(Variable *);
+        Integer *divide(Variable *);
         Integer *lor(Variable *);
         Integer *land(Variable *);
         Integer *lxor(Variable *);
         Integer *lshft(Variable *);
         Integer *rshft(Variable *);
-        Boolean *greater(Variable *variable);
-        Boolean *less(Variable *variable);
-        Boolean *equals(Variable *variable);
+        Boolean *greater(Variable *);
+        Boolean *less(Variable *);
+        Boolean *equals(Variable *);
         Integer(Types type, std::string data);
         Integer(int i);
         Integer();
@@ -158,13 +163,14 @@ namespace fastscript::runtime
         Integer *lor(Variable *);
         Integer *land(Variable *);
         Integer *lxor(Variable *);
-        Integer *add(Variable *variable);
-        Integer *multiply(Variable *variable);
-        Integer *subtract(Variable *variable);
-        Integer *divide(Variable *variable);
-        Boolean *greater(Variable *variable);
-        Boolean *less(Variable *variable);
-        Boolean *equals(Variable *variable);
+        Integer *add(Variable *);
+        Integer *multiply(Variable *);
+        Integer *subtract(Variable *);
+        Integer *divide(Variable *);
+        Boolean *greater(Variable *);
+        Boolean *less(Variable *);
+        Boolean *equals(Variable *);
+        Integer *modulo(Variable *);
         //Integer *lnot();
         std::string to_string() { return this->value ? "true" : "false"; }
         int as_int() { return this->value; }

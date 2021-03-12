@@ -99,7 +99,7 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
             }
             break;
         case '(' ... '/': //()*+,-./
-        case '&':
+        case '%' ... '&':
         case '|':
         case '[' ... '^': // [\]^
         case '{':
