@@ -20,10 +20,10 @@ int main(int argc, char *argv[])
             return 1;
         }
         fseek(fh, 0, SEEK_END);
-        size_t fileSize = ftell(fh);
+        size_t fileSize = ftell(fh) + 1;
         fseek(fh, 0, SEEK_SET);
         std::string fileContents(fileSize, ' ');
-        fread((void*)fileContents.data(), 1, fileSize, fh);
+        fread((void *)fileContents.data(), 1, fileSize, fh);
 
         token::Tokenizer tokenizer;
         std::vector<token::Token *> tokens = tokenizer.parse(fileContents);
