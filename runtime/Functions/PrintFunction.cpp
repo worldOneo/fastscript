@@ -66,4 +66,16 @@ namespace fastscript::runtime
         }
         return nullptr;
     }
+
+    Variable *Input::execute(std::vector<Variable *> args)
+    {
+        String *stringVar = dynamic_cast<String *>(args[0]);
+        if (stringVar)
+        {
+            std::cout << stringVar->to_string();
+        }
+        std::string input;
+        std::getline(std::cin, input);
+        return new String(STRING, input);
+    }
 }

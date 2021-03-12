@@ -27,6 +27,9 @@ parser::Parser::Parser()
     this->mFunctionMap["print"] = new runtime::PrintFunction();
     this->mFunctionMap["printf"] = new runtime::PrintFormatedFunction();
     this->mFunctionMap["boolean"] = new runtime::AsBoolean();
+    this->mFunctionMap["input"] = new runtime::Input();
+    this->mFunctionMap["integer"] = new runtime::AsInteger();
+
 
     //Math
     this->mFunctionMap["add"] = new runtime::Add();

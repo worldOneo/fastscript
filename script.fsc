@@ -83,3 +83,11 @@ a[0] = "rewritten";
 printf("The array was {0}", a[0]);
 
 printf("1+1={0}", 1 + 1);
+
+iterations = input("Countdown from: ");
+index = integer(iterations);
+while (index > 0) {
+    printf("{0}...", index);
+    index = index - 1;
+}
+print("Countdown is over!");

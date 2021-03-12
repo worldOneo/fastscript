@@ -69,6 +69,21 @@ namespace fastscript::runtime
         return new Boolean(mathVar->as_int());
     }
 
+    Variable *AsInteger::execute(std::vector<Variable *> args)
+    {
+        MathVar *mathVar = dynamic_cast<MathVar *>(args.at(0));
+        if (mathVar)
+        {
+            return new Integer(mathVar->as_int());
+        }
+        StringAble *stringVar = dynamic_cast<StringAble *>(args.at(0));
+        if (stringVar)
+        {
+            return new Integer(std::stoi(stringVar->to_string()));
+        }
+        panic_throw("Varible %s cant be converted to Integer", args.at(0));
+    }
+
     Variable *Modulo::execute(std::vector<Variable *> args)
     {
         MathVar *mathVar = ensure_mathvar(args.at(0));
