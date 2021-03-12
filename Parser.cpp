@@ -147,10 +147,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
             if (!mathVar->as_int())
             {
                 mBraceCount--;
-                do
-                {
-                    currToken = tokens[++index];
-                } while (!(currToken->mType == token::OPERATOR && currToken->mContent == "}"));
+                this->skipScope(tokens, &index);
             }
             delete condition;
         }
@@ -173,16 +170,14 @@ void parser::Parser::parse(std::vector<token::Token *> program)
             if (!this->exceptOperator("{", tokens, &index))
                 panic("{ excepted after condition", tokens[index]);
 
+            mBraceCount++;
             if (!mathVar->as_int())
             {
-                do
-                {
-                    currToken = tokens[++index];
-                } while (!(currToken->mType == token::OPERATOR && currToken->mContent == "}"));
+                mBraceCount--;
+                this->skipScope(tokens, &index);
             }
 
             delete condition;
-            mBraceCount++;
             mStack.push_back({mBraceCount, --jmp});
         }
         break;
@@ -349,4 +344,29 @@ bool parser::Parser::exceptOperator(std::string excepted, token::Token *tokens[]
     *idx += 1;
     auto curr = tokens[*idx];
     return curr->mType == token::OPERATOR && curr->mContent == excepted;
+}
+
+void parser::Parser::skipScope(token::Token *tokens[], int *idx)
+{
+    token::Token *currToken;
+    size_t cnt = mBraceCount + 1;
+    do
+    {
+        *idx += 1;
+        currToken = tokens[*idx];
+        cnt += (currToken->mType == token::OPERATOR) *
+               ((currToken->mContent == "{") +
+                (-(currToken->mContent == "}")));
+        /*if (currToken->mType == token::OPERATOR)
+        {
+            if (currToken->mContent == "{")
+            {
+                cnt++;
+            }
+            else if (currToken->mContent == "}")
+            {
+                cnt--;
+            }
+        }*/
+    } while (cnt != mBraceCount);
 }

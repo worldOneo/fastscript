@@ -46,8 +46,11 @@ if(false) {
 
 index = 0;
 while(index < 10) {
-    printf("Counting game: {0}", index);
     index = index+1;
+    if(index == 5) {
+        printf("Bar");
+    }
+    printf("Counting game: {0}", index);
 }
 
 a = [7,15,"3"];
