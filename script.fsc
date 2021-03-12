@@ -101,3 +101,6 @@ printf("'asd'=='asd': {0}", "asd" == "asd");
 printf("'asd'=='asf': {0}", "asd" == "asf");
 printf("'Hello' > 'World': {0}", "Hello" > "World");
 printf("'Hello' < 'World': {0}", "Hello" < "World");
+
+
+printf("1. is a {0}, 1 is an {1}, 'a' is a {2}", typeof(1.), typeof(1), typeof("a"));

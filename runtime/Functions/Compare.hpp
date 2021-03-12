@@ -7,4 +7,5 @@ namespace fastscript::runtime
     function_with_name(LogicLT);
     function_with_name(LogicLTEQ);
     function_with_name(LogicGTEQ);
+    function_with_name(TypeOf);
 }

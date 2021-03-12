@@ -36,7 +36,7 @@ namespace fastscript::runtime
         Boolean *equals = compVar->equals(args.at(1));
         if (equals->getValue())
             return equals;
-        
+
         delete equals;
         return new Boolean(compVar->less(args.at(1)));
     }
@@ -47,8 +47,16 @@ namespace fastscript::runtime
         Boolean *equals = compVar->equals(args.at(1));
         if (equals->getValue())
             return equals;
-        
+
         delete equals;
         return new Boolean(compVar->greater(args.at(1)));
+    }
+
+    Variable *TypeOf::execute(std::vector<Variable *> args)
+    {
+        if(args.size() != 1)
+            throw std::runtime_error("typeof takes exactly one arguement!");
+        
+        return new String(STRING, args.at(0)->name());
     }
 }

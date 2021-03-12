@@ -30,6 +30,7 @@ parser::Parser::Parser()
     this->mFunctionMap["input"] = new runtime::Input();
     this->mFunctionMap["integer"] = new runtime::AsInteger();
     this->mFunctionMap["double"] = new runtime::AsDouble();
+    this->mFunctionMap["typeof"] = new runtime::TypeOf();
 
     //Math
     this->mFunctionMap["add"] = new runtime::Add();
