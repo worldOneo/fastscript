@@ -12,6 +12,7 @@ void endToken(std::vector<Token *> &tokenized, Token *&token)
             if (token->mContent == "true" || token->mContent == "false")
             {
                 token->mType = BOOLEAN;
+                token->mHeatedContent = token->mContent == "true";
             }
             else if (token->mContent == "if")
             {
@@ -33,6 +34,23 @@ void endToken(std::vector<Token *> &tokenized, Token *&token)
                 token->mType = CONTINUE;
                 token->mContent.erase();
             }
+        }
+        else if (token->mType == OPERATOR)
+        {
+            if (token->mContent.size() == 1)
+            {
+                token->mHeatedContent = token->mContent.at(0);
+            }
+            else
+            {
+                token->mHeatedContent = (((short)token->mContent.at(0)) << 8) | (0x00ff & token->mContent.at(1));
+            }
+            token->mContent.erase();
+        }
+        else if (token->mType == INTEGER)
+        {
+            token->mHeatedContent = std::stoi(token->mContent);
+            token->mContent.erase();
         }
         tokenized.push_back(token);
     }

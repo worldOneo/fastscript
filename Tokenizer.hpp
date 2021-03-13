@@ -38,6 +38,7 @@ namespace fastscript::token
     public:
         enum Type mType;
         std::string mContent;
+        int mHeatedContent;
         int mLine;
     };
 

@@ -5,6 +5,7 @@
 #include "runtime/Variables/Variable.hpp"
 #include "runtime/Functions/Function.hpp"
 #include "runtime/LiveFunctions/LiveFunction.hpp"
+#define _dci(x,y) ((int) x) << 8 | y
 
 namespace fastscript::parser
 {
@@ -28,9 +29,9 @@ namespace fastscript::parser
 
         std::vector<std::map<std::string, runtime::Variable *> *> mScopedVariables;
 
-        std::map<std::string, std::string> mOperatorMap;
-        std::map<std::string, std::string> mComparatorMap;
-        std::map<std::string, std::string> mCondBitwiseMap;
+        std::map<int, std::string> mOperatorMap;
+        std::map<int, std::string> mComparatorMap;
+        std::map<int, std::string> mCondBitwiseMap;
 
         std::vector<std::pair<int, int>> mStack;
         size_t mBraceCount = 0;
@@ -40,12 +41,12 @@ namespace fastscript::parser
         runtime::LiveFunction *functionDefinition(token::Token *tokens[], int *idx);
         runtime::Variable *nextVariable(token::Token *tokens[], int *idx);
         runtime::Variable *nextVariable(token::Token *tokens[], int *idx, bool allowComparison);
-        runtime::Variable *evaluateMapOperation(std::map<std::string, std::string> operationMap,
+        runtime::Variable *evaluateMapOperation(std::map<int, std::string> operationMap,
                                                 int *idx, token::Token *potentialOperator,
                                                 token::Token *tokens[], runtime::Variable *var,
                                                 bool allowComparison);
         std::map<std::string, runtime::Variable *> *getVarScope(std::string);
-        bool exceptOperator(std::string excepted, token::Token *tokens[], int *idx);
+        bool exceptOperator(short excepted, token::Token *tokens[], int *idx);
         void skipScope(token::Token *tokens[], int *idx);
 
     public:

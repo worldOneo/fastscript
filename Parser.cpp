@@ -57,26 +57,25 @@ parser::Parser::Parser()
     this->mFunctionMap["cor"] = new runtime::CondOR();
 
     //Symbol-mapping
-    this->mOperatorMap["+"] = "add";
-    this->mOperatorMap["-"] = "subtract";
-    this->mOperatorMap["*"] = "multiply";
-    this->mOperatorMap["/"] = "divide";
-    this->mOperatorMap["%"] = "modulo";
-    this->mOperatorMap["^"] = "xor";
-    this->mOperatorMap["|"] = "or";
-    this->mOperatorMap["&"] = "and";
-    this->mOperatorMap["<<"] = "lshft";
-    this->mOperatorMap[">>"] = "rshft";
-    this->mOperatorMap[">>"] = "rshft";
+    this->mOperatorMap['+'] = "add";
+    this->mOperatorMap['-'] = "subtract";
+    this->mOperatorMap['*'] = "multiply";
+    this->mOperatorMap['/'] = "divide";
+    this->mOperatorMap['%'] = "modulo";
+    this->mOperatorMap['^'] = "xor";
+    this->mOperatorMap['|'] = "or";
+    this->mOperatorMap['&'] = "and";
+    this->mOperatorMap[_dci('<', '<')] = "lshft";
+    this->mOperatorMap[_dci('>', '>')] = "rshft";
 
-    this->mComparatorMap["=="] = "equal";
-    this->mComparatorMap[">"] = "gt";
-    this->mComparatorMap["<"] = "lt";
-    this->mComparatorMap["<="] = "lteq";
-    this->mComparatorMap[">="] = "gteq";
+    this->mComparatorMap[_dci('=', '=')] = "equal";
+    this->mComparatorMap['>'] = "gt";
+    this->mComparatorMap['<'] = "lt";
+    this->mComparatorMap[_dci('<', '=')] = "lteq";
+    this->mComparatorMap[_dci('>', '=')] = "gteq";
 
-    this->mCondBitwiseMap["&&"] = "cand";
-    this->mCondBitwiseMap["||"] = "cor";
+    this->mCondBitwiseMap[_dci('&', '&')] = "cand";
+    this->mCondBitwiseMap[_dci('|', '|')] = "cor";
 }
 
 void parser::Parser::parse(std::vector<token::Token *> program)
@@ -95,15 +94,15 @@ void parser::Parser::parse(std::vector<token::Token *> program)
             toper = tokens[++index];
             if (toper->mType == token::OPERATOR)
             {
-                if (toper->mContent == "=")
+                if (toper->mHeatedContent == '=')
                 {
                     this->asign(currToken, tokens, &index);
                 }
-                else if (toper->mContent == "(")
+                else if (toper->mHeatedContent == '(')
                 {
                     this->functionCall(currToken, tokens, &index);
                 }
-                else if (toper->mContent == "[")
+                else if (toper->mHeatedContent == '[')
                 {
                     auto varName = currToken->mContent;
                     auto variableMap = this->getVarScope(varName);
@@ -123,16 +122,16 @@ void parser::Parser::parse(std::vector<token::Token *> program)
 
                     int accessIndex = mathVar->as_int();
 
-                    if (!exceptOperator("]", tokens, &index))
+                    if (!exceptOperator(']', tokens, &index))
                         panic("] ecepted, unclosed array access", currToken);
 
-                    if (!exceptOperator("=", tokens, &index))
+                    if (!exceptOperator('=', tokens, &index))
                         panic("= excepted, unfinished array definition.", currToken);
 
                     runtime::Variable *value = this->nextVariable(tokens, &index);
                     arrayVar->set_index(accessIndex, value);
                 }
-                else if (toper->mContent == ":")
+                else if (toper->mHeatedContent == ':')
                 {
                     if (this->mLiveFunctionMap.find(currToken->mContent) != this->mLiveFunctionMap.end())
                         delete this->mLiveFunctionMap[currToken->mContent];
@@ -144,7 +143,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
             break;
         case token::OPERATOR:
         {
-            if (currToken->mContent == "}" && !this->mStack.empty())
+            if (currToken->mHeatedContent == '}' && !this->mStack.empty())
             {
 
                 std::pair<int, int> poped = this->mStack.at(this->mStack.size() - 1);
@@ -156,7 +155,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                     {
                         auto max = this->mScopedVariables.size() - 1;
                         auto map = this->mScopedVariables.at(max);
-                        for (auto it = map->cbegin(); it != map->cend(); it++)
+                        for (auto it = map->begin(); it != map->end(); it++)
                             if (it->second->isFree() && it->second->isScoped())
                                 delete it->second;
 
@@ -167,7 +166,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                 }
                 mBraceCount--;
             }
-            else if (currToken->mContent == "{")
+            else if (currToken->mHeatedContent == '{')
             {
                 mBraceCount++;
             }
@@ -176,7 +175,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
         case token::IFSTMT:
         {
             toper = tokens[++index];
-            if (toper->mContent != "(")
+            if (toper->mHeatedContent != '(')
                 panic("( after while expected", toper);
 
             auto condition = this->nextVariable(tokens, &index);
@@ -184,10 +183,10 @@ void parser::Parser::parse(std::vector<token::Token *> program)
             if (!mathVar)
                 panic("Value cant be used as boolean.", toper);
 
-            if (!this->exceptOperator(")", tokens, &index))
+            if (!this->exceptOperator(')', tokens, &index))
                 panic(") excepted after condition", tokens[index]);
 
-            if (!this->exceptOperator("{", tokens, &index))
+            if (!this->exceptOperator('{', tokens, &index))
                 panic("{ excepted after condition", tokens[index]);
 
             mBraceCount++;
@@ -204,7 +203,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
         {
             int jmp = index;
             toper = tokens[++index];
-            if (toper->mContent != "(")
+            if (toper->mHeatedContent != '(')
                 panic("( after while expected", toper);
 
             auto condition = this->nextVariable(tokens, &index);
@@ -212,10 +211,10 @@ void parser::Parser::parse(std::vector<token::Token *> program)
             if (!mathVar)
                 panic("Value cant be used as boolean.", toper);
 
-            if (!this->exceptOperator(")", tokens, &index))
+            if (!this->exceptOperator(')', tokens, &index))
                 panic(") excepted after condition", tokens[index]);
 
-            if (!this->exceptOperator("{", tokens, &index))
+            if (!this->exceptOperator('{', tokens, &index))
                 panic("{ excepted after condition", tokens[index]);
 
             mBraceCount++;
@@ -263,7 +262,7 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
     {
         std::map<std::string, runtime::Variable *> *variableMap = nullptr;
         token::Token *variableScoper = tokens[*idx + 1];
-        if (variableScoper->mType == token::OPERATOR && variableScoper->mContent == "#")
+        if (variableScoper->mType == token::OPERATOR && variableScoper->mHeatedContent == '#')
         {
             *idx += 1;
             if (this->mScopedVariables.size() == 0)
@@ -271,7 +270,7 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
 
             variableMap = this->mScopedVariables.at(this->mScopedVariables.size() - 1);
         }
-        else if (variableScoper->mType == token::OPERATOR && variableScoper->mContent == "$")
+        else if (variableScoper->mType == token::OPERATOR && variableScoper->mHeatedContent == '$')
         {
             *idx += 1;
             variableMap = this->mVariableMap;
@@ -288,7 +287,7 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
         newVar->setFree(false);
         (*variableMap)[varName] = newVar;
 
-        if (del && !currentVar->isScoped())
+        if (del)
             delete currentVar;
     }
     catch (std::exception &err)
@@ -305,15 +304,15 @@ runtime::Variable *parser::Parser::functionCall(token::Token *tInvoke, token::To
 {
     std::vector<runtime::Variable *> args;
     token::Token *toper = tokens[*idx + 1];
-    if (!(toper->mType == token::Type::OPERATOR && toper->mContent == ")"))
+    if (!(toper->mType == token::Type::OPERATOR && toper->mHeatedContent == ')'))
     {
         while (true)
         {
             args.push_back(this->nextVariable(tokens, idx));
             token::Token *toper = tokens[*idx + 1];
-            if (toper->mType == token::Type::OPERATOR && toper->mContent == ")")
+            if (toper->mType == token::Type::OPERATOR && toper->mHeatedContent == ')')
                 break;
-            else if (toper->mContent != ",")
+            else if (toper->mHeatedContent != ',')
             {
                 panic("Unexcepted value!", toper);
             }
@@ -321,7 +320,7 @@ runtime::Variable *parser::Parser::functionCall(token::Token *tInvoke, token::To
         }
     }
 
-    if (!exceptOperator(")", tokens, idx))
+    if (!exceptOperator(')', tokens, idx))
         panic(") excepted after arguements of function call", tokens[*idx]);
 
     if (this->mLiveFunctionMap.find(tInvoke->mContent) != this->mLiveFunctionMap.end())
@@ -357,14 +356,14 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
     return this->nextVariable(tokens, idx, true);
 }
 
-runtime::Variable *parser::Parser::evaluateMapOperation(std::map<std::string, std::string> operationMap,
+runtime::Variable *parser::Parser::evaluateMapOperation(std::map<int, std::string> operationMap,
                                                         int *idx, token::Token *potentialOperator,
                                                         token::Token *tokens[], runtime::Variable *var,
                                                         bool allowComparison)
 {
     *idx += 1;
     runtime::Variable *secondArg = this->nextVariable(tokens, idx, allowComparison);
-    std::string op = operationMap.at(potentialOperator->mContent);
+    std::string op = operationMap.at(potentialOperator->mHeatedContent);
     auto _var = this->mFunctionMap.at(op)
                     ->execute(std::vector<runtime::Variable *>{
                         var,
@@ -387,7 +386,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
     if (tval->mType == token::INTEGER)
     {
         *idx += 1;
-        var = new runtime::Integer(runtime::INTEGER, tval->mContent);
+        var = new runtime::Integer(tval->mHeatedContent);
     }
     else if (tval->mType == token::STRING)
     {
@@ -397,7 +396,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
     else if (tval->mType == token::BOOLEAN)
     {
         *idx += 1;
-        var = new runtime::Boolean(tval->mContent);
+        var = new runtime::Boolean(tval->mHeatedContent);
     }
     else if (tval->mType == token::DOUBLE)
     {
@@ -413,7 +412,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
         {
             *idx += 1;
             var = variableMap->at(varName);
-            if (tokens[*idx + 1]->mType == token::OPERATOR && tokens[*idx + 1]->mContent == "[")
+            if (tokens[*idx + 1]->mType == token::OPERATOR && tokens[*idx + 1]->mHeatedContent == '[')
             {
                 runtime::Getter *getVar = dynamic_cast<runtime::Getter *>(var);
                 if (!getVar)
@@ -429,7 +428,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
                 *idx += 1;
             }
         }
-        else if (toper->mType == token::OPERATOR && toper->mContent == "(")
+        else if (toper->mType == token::OPERATOR && toper->mHeatedContent == '(')
         {
             *idx += 2;
             var = this->functionCall(tval, tokens, idx);
@@ -437,7 +436,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
     }
     else if (tval->mType == token::OPERATOR)
     {
-        if (tval->mContent == "[")
+        if (tval->mHeatedContent == '[')
         {
             runtime::Array *newArray = new runtime::Array();
             *idx += 1;
@@ -445,10 +444,10 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
             {
                 newArray->add(this->nextVariable(tokens, idx));
 
-                if (tokens[*idx + 1]->mType == token::OPERATOR && tokens[*idx + 1]->mContent == "]")
+                if (tokens[*idx + 1]->mType == token::OPERATOR && tokens[*idx + 1]->mHeatedContent == ']')
                     break;
 
-                if (!exceptOperator(",", tokens, idx))
+                if (!exceptOperator(',', tokens, idx))
                     panic(", expected in list constructor", tokens[*idx]);
             }
             *idx += 1;
@@ -464,7 +463,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
         token::Token *potentialOperator = tokens[*idx + 1];
         if (potentialOperator->mType == token::OPERATOR)
         {
-            if (this->mOperatorMap.find(potentialOperator->mContent) != this->mOperatorMap.end())
+            if (this->mOperatorMap.find(potentialOperator->mHeatedContent) != this->mOperatorMap.end())
             {
                 var = evaluateMapOperation(this->mOperatorMap, idx, potentialOperator, tokens, var, false);
             }
@@ -473,7 +472,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
         token::Token *potentialComparator = tokens[*idx + 1];
         if (potentialComparator->mType == token::OPERATOR && allowComparison)
         {
-            if (this->mComparatorMap.find(potentialComparator->mContent) != this->mComparatorMap.end())
+            if (this->mComparatorMap.find(potentialComparator->mHeatedContent) != this->mComparatorMap.end())
             {
                 var = evaluateMapOperation(this->mComparatorMap, idx, potentialComparator, tokens, var, false);
             }
@@ -482,7 +481,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
         token::Token *bitwiseCond = tokens[*idx + 1];
         if (bitwiseCond->mType == token::OPERATOR && allowComparison)
         {
-            if (this->mCondBitwiseMap.find(bitwiseCond->mContent) != this->mCondBitwiseMap.end())
+            if (this->mCondBitwiseMap.find(bitwiseCond->mHeatedContent) != this->mCondBitwiseMap.end())
             {
                 var = evaluateMapOperation(this->mCondBitwiseMap, idx, bitwiseCond, tokens, var, true);
             }
@@ -491,11 +490,11 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
     }
 }
 
-bool parser::Parser::exceptOperator(std::string excepted, token::Token *tokens[], int *idx)
+bool parser::Parser::exceptOperator(short excepted, token::Token *tokens[], int *idx)
 {
     *idx += 1;
     auto curr = tokens[*idx];
-    return curr->mType == token::OPERATOR && curr->mContent == excepted;
+    return curr->mType == token::OPERATOR && curr->mHeatedContent == excepted;
 }
 
 void parser::Parser::skipScope(token::Token *tokens[], int *idx)
@@ -507,8 +506,8 @@ void parser::Parser::skipScope(token::Token *tokens[], int *idx)
         *idx += 1;
         currToken = tokens[*idx];
         cnt += (currToken->mType == token::OPERATOR) *
-               ((currToken->mContent == "{") -
-                (currToken->mContent == "}"));
+               ((currToken->mHeatedContent == '{') -
+                (currToken->mHeatedContent == '}'));
     } while (cnt != mBraceCount);
 }
 

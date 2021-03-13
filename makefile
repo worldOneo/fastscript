@@ -7,14 +7,18 @@ OUT	 = fastscript
 CC	 = g++
 FLAGS= -Wall -std=c++17
 
-all: $(OBJS)
-	$(CC) -g $(OBJS) -o $(OUT)
+all: build
 
-release: $(OBJS)
-	$(CC) $(OBJS) -o $(OUT)
+debug: FLAGS+= -g
+debug: build
+
+
+
+build: $(OBJS)
+	$(CC) $(OBJS) -O3  -o$(OUT)
 
 %.o: %.cpp
-	$(CC) $(FLAGS) -g -c -o $@ $<
+	$(CC) $(FLAGS) -O3 -c -o $@ $<
 
 clean:
 	rm -f $(OBJS)  

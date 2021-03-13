@@ -28,14 +28,15 @@ int main(int argc, char *argv[])
 
         token::Tokenizer tokenizer;
         std::vector<token::Token *> tokens = tokenizer.parse(fileContents);
-        
+
         /*int i = 0;
         for (auto parsed_token : tokens)
         {
             std::cout << std::setw(5) << i++ << std::setw(20)
                       << token::T_CANONICAL[parsed_token->mType] << std::setw(20)
                       << parsed_token->mContent << std::setw(20)
-                      << parsed_token->mLine << std::endl;
+                      << parsed_token->mLine << std::setw(9)
+                      << parsed_token->mHeatedContent << std::endl;
         }
         std::cout << std::setw(0);*/
 
