@@ -155,13 +155,19 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                     {
                         auto max = this->mScopedVariables.size() - 1;
                         auto map = this->mScopedVariables.at(max);
-                        for (auto it = map->begin(); it != map->end(); it++)
-                            if (it->second->isFree() && it->second->isScoped())
-                                delete it->second;
+                        if (map->first == this->mBraceCount)
+                        {
+                            for (auto it = map->second->begin(); it != map->second->end(); it++)
+                            {
+                                auto localVar = it->second;
+                                if (localVar->isFree() && localVar->isScoped())
+                                    delete localVar;
+                            }
 
-                        delete map;
+                            delete map;
 
-                        this->mScopedVariables.erase(this->mScopedVariables.begin() + max);
+                            this->mScopedVariables.erase(this->mScopedVariables.begin() + max);
+                        }
                     }
                 }
                 mBraceCount--;
@@ -268,7 +274,7 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
             if (this->mScopedVariables.size() == 0)
                 panic("Cant scope variable, not in a scope!", tokens[*idx + 1]);
 
-            variableMap = this->mScopedVariables.at(this->mScopedVariables.size() - 1);
+            variableMap = this->mScopedVariables.at(this->mScopedVariables.size() - 1)->second;
         }
         else if (variableScoper->mType == token::OPERATOR && variableScoper->mHeatedContent == '$')
         {
@@ -285,9 +291,10 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
 
         auto newVar = this->nextVariable(tokens, idx);
         newVar->setFree(false);
+        newVar->setScoped(variableMap != this->mVariableMap);
         (*variableMap)[varName] = newVar;
 
-        if (del)
+        if (del && newVar != currentVar)
             delete currentVar;
     }
     catch (std::exception &err)
@@ -337,7 +344,12 @@ runtime::Variable *parser::Parser::functionCall(token::Token *tInvoke, token::To
             args.at(i)->setScoped(true);
             i++;
         }
-        this->mScopedVariables.push_back(paramMap);
+        std::pair<int, std::map<std::string, runtime::Variable *> *> *pair =
+            new std::pair<int, std::map<std::string, runtime::Variable *> *>();
+
+        pair->first = this->mBraceCount;
+        pair->second = paramMap;
+        this->mScopedVariables.push_back(pair);
         *idx = function->getStart();
         return nullptr; // dont clean args
     }
@@ -516,11 +528,11 @@ std::map<std::string, runtime::Variable *> *parser::Parser::getVarScope(std::str
     if (this->mScopedVariables.size() > 0)
     {
         auto max = mScopedVariables.size() - 1;
-        auto map = this->mScopedVariables.at(max);
+        auto map = this->mScopedVariables.at(max)->second;
 
         if (map->find(id) != map->end())
         {
-            return this->mScopedVariables.at(max);
+            return map;
         }
     }
 

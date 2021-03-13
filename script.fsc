@@ -140,10 +140,10 @@ name = "worldOneo";
 printf("My name 'worldOneo' is {0} characters long", sizeof(name));
 
 printnamefromtop:() {
-    name = "worldOneo";
+    localname =# "worldOneo";
     index = 0;
     while (index < sizeof("worldOneo")) {
-        printf("{0}", name[index]);
+        printf("{0}", localname[index]);
         index = index +1;
     }
 }

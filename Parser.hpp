@@ -27,7 +27,7 @@ namespace fastscript::parser
         std::map<std::string, runtime::Function *> mFunctionMap;
         std::map<std::string, runtime::LiveFunction *> mLiveFunctionMap;
 
-        std::vector<std::map<std::string, runtime::Variable *> *> mScopedVariables;
+        std::vector<std::pair<int, std::map<std::string, runtime::Variable *>*> *> mScopedVariables;
 
         std::map<int, std::string> mOperatorMap;
         std::map<int, std::string> mComparatorMap;
