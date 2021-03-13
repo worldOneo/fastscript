@@ -36,6 +36,7 @@ runtime::LiveFunction *parser::Parser::functionDefinition(token::Token *tokens[]
     if (!this->exceptOperator("{", tokens, idx))
         panic("{ required to open function", tokens[*idx]);
 
+    this->mBraceCount++;
     int start = *idx;
     this->skipScope(tokens, idx);
     int end = *idx;

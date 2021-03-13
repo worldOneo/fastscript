@@ -31,6 +31,7 @@ parser::Parser::Parser()
     this->mFunctionMap["integer"] = new runtime::AsInteger();
     this->mFunctionMap["double"] = new runtime::AsDouble();
     this->mFunctionMap["typeof"] = new runtime::TypeOf();
+    this->mFunctionMap["sizeof"] = new runtime::SizeOf();
 
     //Math
     this->mFunctionMap["add"] = new runtime::Add();
@@ -82,7 +83,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
 {
     token::Token *currToken;
     token::Token *toper;
-    token::Token *tokens[program.capacity()];
+    token::Token *tokens[program.size()];
     std::copy(program.begin(), program.end(), tokens);
     int index = 0;
     while (index < program.capacity())
@@ -223,9 +224,10 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                 mBraceCount--;
                 this->skipScope(tokens, &index);
             }
+            else
+                mStack.push_back({mBraceCount, --jmp});
 
             delete condition;
-            mStack.push_back({mBraceCount, --jmp});
         }
         break;
         case token::BREAK:
@@ -245,7 +247,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
         break;
         }
 
-        size_t max = program.capacity() - 3;
+        size_t max = program.size() - 1;
 
         if (index >= max)
             break;
@@ -268,7 +270,8 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
                 panic("Cant scope variable, not in a scope!", tokens[*idx + 1]);
 
             variableMap = this->mScopedVariables.at(this->mScopedVariables.size() - 1);
-        } else if(variableScoper->mType == token::OPERATOR && variableScoper->mContent == "$")
+        }
+        else if (variableScoper->mType == token::OPERATOR && variableScoper->mContent == "$")
         {
             *idx += 1;
             variableMap = this->mVariableMap;
@@ -325,6 +328,7 @@ runtime::Variable *parser::Parser::functionCall(token::Token *tInvoke, token::To
     {
         runtime::LiveFunction *function = this->mLiveFunctionMap[tInvoke->mContent];
         this->mStack.push_back({++this->mBraceCount, *idx});
+
         std::map<std::string, runtime::Variable *> *paramMap = new std::map<std::string, runtime::Variable *>();
         size_t i = 0;
         auto params = function->getParameters();
@@ -409,16 +413,19 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
         {
             *idx += 1;
             var = variableMap->at(varName);
-            runtime::Array *arrayVar = dynamic_cast<runtime::Array *>(var);
             if (tokens[*idx + 1]->mType == token::OPERATOR && tokens[*idx + 1]->mContent == "[")
             {
+                runtime::Getter *getVar = dynamic_cast<runtime::Getter *>(var);
+                if (!getVar)
+                    panic("Can't acces variable with get", tval);
+
                 *idx += 1;
                 runtime::Variable *access = this->nextVariable(tokens, idx);
                 runtime::MathVar *mathVar = dynamic_cast<runtime::MathVar *>(access);
                 if (!mathVar)
-                    panic("Array acces without mathematical var!", tval);
+                    panic("Can't acces without mathematical var!", tval);
 
-                var = arrayVar->get(mathVar->as_int());
+                var = getVar->get(mathVar->as_int());
                 *idx += 1;
             }
         }
@@ -500,8 +507,8 @@ void parser::Parser::skipScope(token::Token *tokens[], int *idx)
         *idx += 1;
         currToken = tokens[*idx];
         cnt += (currToken->mType == token::OPERATOR) *
-               ((currToken->mContent == "{") +
-                (-(currToken->mContent == "}")));
+               ((currToken->mContent == "{") -
+                (currToken->mContent == "}"));
     } while (cnt != mBraceCount);
 }
 

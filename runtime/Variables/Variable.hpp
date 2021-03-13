@@ -95,6 +95,12 @@ namespace fastscript::runtime
         virtual std::string to_string() { return "to_string not implemented"; };
     };
 
+    class Getter
+    {
+    public:
+        virtual Variable  *get(int i) { throw std::runtime_error("Get not implemented"); };
+    };
+
     class Sized
     {
     public:
@@ -111,13 +117,14 @@ namespace fastscript::runtime
         virtual Boolean *equals(Variable *variable) { return nullptr; };
     };
 
-    class String : public Variable, public StringAble, public Sized, public Comparator
+    class String : public Variable, public StringAble, public Sized, public Comparator, public Getter
     {
     protected:
         std::string data;
 
     public:
         String *add(Variable *variable);
+        Variable *get(int i);
         Boolean *greater(Variable *variable);
         Boolean *less(Variable *variable);
         Boolean *equals(Variable *variable);
@@ -207,7 +214,7 @@ namespace fastscript::runtime
         ~Double();
     };
 
-    class Array : public Variable, public StringAble, public Sized //, public Comparator
+    class Array : public Variable, public StringAble, public Sized, public Getter
     {
     private:
         size_t size = 16;

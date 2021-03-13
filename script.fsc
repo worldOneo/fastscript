@@ -104,7 +104,7 @@ printf("'Hello' > 'World': {0}", "Hello" > "World");
 printf("'Hello' < 'World': {0}", "Hello" < "World");
 
 
-printf("1. is a {0}, 1 is an {1}, 'a' is a {2}", typeof(1.), typeof(1), typeof("a"));
+printf("1. is a {0}, 1 is an {1}, 'a' is a {2}", typeof (1.), typeof (1), typeof ("a"));
 
 printname: (name) {
     printf("Hi, {0}", name);
@@ -125,7 +125,7 @@ noscope: () {
 }
 globalscope: () {
     "this function creates a new global vriable";
-    _WRE_2 =$ 3;
+    _WRE_2 = $ 3;
 }
 addnumbers(1, 3);
 localscope();
@@ -135,3 +135,17 @@ printf("WRE: {0}", _WRE_1);
 globalscope();
 printf("WRE: {0}", _WRE_2);
 
+
+name = "worldOneo";
+printf("My name 'worldOneo' is {0} characters long", sizeof(name));
+
+printnamefromtop:() {
+    name = "worldOneo";
+    index = 0;
+    while (index < sizeof("worldOneo")) {
+        printf("{0}", name[index]);
+        index = index +1;
+    }
+}
+
+printnamefromtop();

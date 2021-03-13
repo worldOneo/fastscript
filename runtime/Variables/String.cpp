@@ -58,6 +58,17 @@ namespace fastscript::runtime
         return this->data.size();
     }
 
+    Variable *String::get(int i)
+    {
+        if (i >= this->data.size())
+        {
+            panic_throw("Index out of bounds %s", this);
+        }
+        auto a = std::string();
+        a.push_back(this->data.at(i));
+        return new String(STRING, a);
+    }
+
     std::string String::to_string()
     {
         return this->data;

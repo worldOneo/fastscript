@@ -54,9 +54,21 @@ namespace fastscript::runtime
 
     Variable *TypeOf::execute(std::vector<Variable *> args)
     {
-        if(args.size() != 1)
+        if (args.size() != 1)
+            throw std::runtime_error("typeof takes exactly one arguement!");
+
+        return new String(STRING, args.at(0)->name());
+    }
+
+    Variable *SizeOf::execute(std::vector<Variable *> args)
+    {
+        if (args.size() != 1)
             throw std::runtime_error("typeof takes exactly one arguement!");
         
-        return new String(STRING, args.at(0)->name());
+        Sized *sized = dynamic_cast<Sized *>(args.at(0));
+        if(sized)
+            return new Integer(sized->get_size());
+        
+        return new Integer(1);
     }
 }
