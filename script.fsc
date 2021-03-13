@@ -113,8 +113,8 @@ printname: (name) {
 addnumbers: (a, b) {
     printf("a+b = {0}", a + b);
 }
-
 printname("Test");
+
 
 _WRE_1 = 1;
 localscope: () {
@@ -127,10 +127,11 @@ globalscope: () {
     "this function creates a new global vriable";
     _WRE_2 =$ 3;
 }
+addnumbers(1, 3);
 localscope();
 printf("WRE: {0}", _WRE_1);
 noscope();
 printf("WRE: {0}", _WRE_1);
 globalscope();
 printf("WRE: {0}", _WRE_2);
-addnumbers(1, 3);
+

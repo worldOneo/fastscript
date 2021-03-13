@@ -370,7 +370,7 @@ runtime::Variable *parser::Parser::evaluateMapOperation(std::map<std::string, st
     if (secondArg->isFree() && !secondArg->isScoped())
         delete secondArg;
 
-    if (var->isFree() && !var->isScoped() && var != secondArg)
+    if (var->isFree() && !var->isScoped())
         delete var;
 
     return _var;
@@ -512,7 +512,7 @@ std::map<std::string, runtime::Variable *> *parser::Parser::getVarScope(std::str
         auto max = mScopedVariables.size() - 1;
         auto map = this->mScopedVariables.at(max);
 
-        if (this->mVariableMap->find(id) == this->mVariableMap->end())
+        if (map->find(id) != map->end())
         {
             return this->mScopedVariables.at(max);
         }

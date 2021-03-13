@@ -143,7 +143,7 @@ noscope: () {
     _WRE_1 = 2;
 }
 globalscope: () {
-    "this function creates a new global vriable";
+    "this function creates a new global variable";
     _WRE_2 =$ 3;
 }
 localscope();
