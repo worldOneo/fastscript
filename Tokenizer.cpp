@@ -86,6 +86,7 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
             break;
         case 'A' ... 'Z':
         case 'a' ... 'z':
+        case '_':
             if (token->mType == OPERATOR)
             {
                 endToken(tokenized, token);
@@ -110,6 +111,8 @@ std::vector<Token *> Tokenizer::parse(std::string &script)
         case '{':
         case '}':
         case ':' ... '?': //:;<>=?
+        case '#':
+        case '$':
             if (token->mType == STRING)
             {
                 token->mContent.append(sizeof(curr), curr);

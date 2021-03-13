@@ -22,7 +22,8 @@ namespace fastscript::runtime
     class Variable
     {
     private:
-        bool free = true;
+        bool free = true; // Defines that the variable is temporary maybe deleted at every given time
+        bool scoped = false; // Defines that the variable is defined for the scope and gets deleted at the end of the scope
 
     public:
         virtual Variable *add(Variable *variable)
@@ -51,6 +52,8 @@ namespace fastscript::runtime
         };
         bool isFree() { return this->free; }
         void setFree(bool val) { this->free = val; }
+        bool isScoped() { return this->scoped; }
+        void setScoped(bool val) { this->scoped = val; }
         Variable(Types type, std::string data);
         Variable();
         virtual ~Variable(){};

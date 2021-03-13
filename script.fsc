@@ -68,7 +68,8 @@ while (index < 100) {
     }
 
     if (index == 31) {
-        if (index + 1 == 32) { "<- Alway true, just for testing"
+        if (index + 1 == 32) {
+            "<- Alway true, just for testing"
             break;
         }
     }
@@ -104,3 +105,32 @@ printf("'Hello' < 'World': {0}", "Hello" < "World");
 
 
 printf("1. is a {0}, 1 is an {1}, 'a' is a {2}", typeof(1.), typeof(1), typeof("a"));
+
+printname: (name) {
+    printf("Hi, {0}", name);
+}
+
+addnumbers: (a, b) {
+    printf("a+b = {0}", a + b);
+}
+
+printname("Test");
+
+_WRE_1 = 1;
+localscope: () {
+    _WRE_1 =# 2;
+}
+noscope: () {
+    _WRE_1 = 2;
+}
+globalscope: () {
+    "this function creates a new global vriable";
+    _WRE_2 =$ 3;
+}
+localscope();
+printf("WRE: {0}", _WRE_1);
+noscope();
+printf("WRE: {0}", _WRE_1);
+globalscope();
+printf("WRE: {0}", _WRE_2);
+addnumbers(1, 3);

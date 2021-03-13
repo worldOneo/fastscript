@@ -8,14 +8,14 @@
 
 using namespace fastscript;
 
-void printToken(token::Token *tval)
+void parser::printToken(token::Token *tval)
 {
     std::cout << token::T_CANONICAL[tval->mType]
               << " " << tval->mContent << " line: "
               << tval->mLine << std::endl;
 }
 
-void panic(std::string str, token::Token *tval)
+void parser::panic(std::string str, token::Token *tval)
 {
     printToken(tval);
     throw std::runtime_error(str);
@@ -100,15 +100,16 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                 }
                 else if (toper->mContent == "(")
                 {
-                    this->funcionCall(currToken, tokens, &index);
+                    this->functionCall(currToken, tokens, &index);
                 }
                 else if (toper->mContent == "[")
                 {
-                    if (this->mVariableMap.find(currToken->mContent) == this->mVariableMap.end())
+                    auto varName = currToken->mContent;
+                    auto variableMap = this->getVarScope(varName);
+                    if (variableMap->find(varName) == variableMap->end())
                         panic("Variable not defined", currToken);
 
-                    runtime::Array *arrayVar = dynamic_cast<runtime::Array *>(
-                        this->mVariableMap[currToken->mContent]);
+                    runtime::Array *arrayVar = dynamic_cast<runtime::Array *>(variableMap->at(varName));
 
                     if (!arrayVar)
                         panic("Invalid access", currToken);
@@ -130,17 +131,38 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                     runtime::Variable *value = this->nextVariable(tokens, &index);
                     arrayVar->set_index(accessIndex, value);
                 }
+                else if (toper->mContent == ":")
+                {
+                    if (this->mLiveFunctionMap.find(currToken->mContent) != this->mLiveFunctionMap.end())
+                        delete this->mLiveFunctionMap[currToken->mContent];
+
+                    this->mLiveFunctionMap[currToken->mContent] = this->functionDefinition(tokens, &index);
+                }
                 break;
             }
             break;
         case token::OPERATOR:
+        {
             if (currToken->mContent == "}" && !this->mStack.empty())
             {
+
                 std::pair<int, int> poped = this->mStack.at(this->mStack.size() - 1);
                 if (poped.first == mBraceCount)
                 {
                     index = poped.second;
                     this->mStack.pop_back();
+                    if (this->mScopedVariables.size() > 0)
+                    {
+                        auto max = this->mScopedVariables.size() - 1;
+                        auto map = this->mScopedVariables.at(max);
+                        for (auto it = map->cbegin(); it != map->cend(); it++)
+                            if (it->second->isFree() && it->second->isScoped())
+                                delete it->second;
+
+                        delete map;
+
+                        this->mScopedVariables.erase(this->mScopedVariables.begin() + max);
+                    }
                 }
                 mBraceCount--;
             }
@@ -148,8 +170,8 @@ void parser::Parser::parse(std::vector<token::Token *> program)
             {
                 mBraceCount++;
             }
-            break;
-
+        }
+        break;
         case token::IFSTMT:
         {
             toper = tokens[++index];
@@ -173,6 +195,7 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                 mBraceCount--;
                 this->skipScope(tokens, &index);
             }
+
             delete condition;
         }
         break;
@@ -221,6 +244,12 @@ void parser::Parser::parse(std::vector<token::Token *> program)
         }
         break;
         }
+
+        size_t max = program.capacity() - 3;
+
+        if (index >= max)
+            break;
+
         index++;
     }
 }
@@ -230,14 +259,33 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
     std::string varName = tInvoke->mContent;
     try
     {
-        auto currentVar = this->mVariableMap[varName];
-        bool del = this->mVariableMap.find(varName) != this->mVariableMap.end();
+        std::map<std::string, runtime::Variable *> *variableMap = nullptr;
+        token::Token *variableScoper = tokens[*idx + 1];
+        if (variableScoper->mType == token::OPERATOR && variableScoper->mContent == "#")
+        {
+            *idx += 1;
+            if (this->mScopedVariables.size() == 0)
+                panic("Cant scope variable, not in a scope!", tokens[*idx + 1]);
+
+            variableMap = this->mScopedVariables.at(this->mScopedVariables.size() - 1);
+        } else if(variableScoper->mType == token::OPERATOR && variableScoper->mContent == "$")
+        {
+            *idx += 1;
+            variableMap = this->mVariableMap;
+        }
+        else
+            variableMap = this->getVarScope(varName);
+
+        bool del = variableMap->find(varName) != variableMap->end();
+        runtime::Variable *currentVar = nullptr;
+        if (del)
+            currentVar = variableMap->at(varName);
 
         auto newVar = this->nextVariable(tokens, idx);
         newVar->setFree(false);
-        this->mVariableMap[varName] = newVar;
+        (*variableMap)[varName] = newVar;
 
-        if (del)
+        if (del && !currentVar->isScoped())
             delete currentVar;
     }
     catch (std::exception &err)
@@ -250,17 +298,16 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
     }
 }
 
-runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Token *tokens[], int *idx)
+runtime::Variable *parser::Parser::functionCall(token::Token *tInvoke, token::Token *tokens[], int *idx)
 {
     std::vector<runtime::Variable *> args;
-    int b = 1;
-    token::Token *toper = tokens[*idx + b];
+    token::Token *toper = tokens[*idx + 1];
     if (!(toper->mType == token::Type::OPERATOR && toper->mContent == ")"))
     {
         while (true)
         {
             args.push_back(this->nextVariable(tokens, idx));
-            token::Token *toper = tokens[*idx + b];
+            token::Token *toper = tokens[*idx + 1];
             if (toper->mType == token::Type::OPERATOR && toper->mContent == ")")
                 break;
             else if (toper->mContent != ",")
@@ -274,10 +321,28 @@ runtime::Variable *parser::Parser::funcionCall(token::Token *tInvoke, token::Tok
     if (!exceptOperator(")", tokens, idx))
         panic(") excepted after arguements of function call", tokens[*idx]);
 
+    if (this->mLiveFunctionMap.find(tInvoke->mContent) != this->mLiveFunctionMap.end())
+    {
+        runtime::LiveFunction *function = this->mLiveFunctionMap[tInvoke->mContent];
+        this->mStack.push_back({++this->mBraceCount, *idx});
+        std::map<std::string, runtime::Variable *> *paramMap = new std::map<std::string, runtime::Variable *>();
+        size_t i = 0;
+        auto params = function->getParameters();
+        while (i < params.size())
+        {
+            (*paramMap)[params.at(i)->mContent] = args.at(i);
+            args.at(i)->setScoped(true);
+            i++;
+        }
+        this->mScopedVariables.push_back(paramMap);
+        *idx = function->getStart();
+        return nullptr; // dont clean args
+    }
+
     auto res = this->mFunctionMap.at(tInvoke->mContent)->execute(args);
 
     for (auto arg : args)
-        if (arg->isFree())
+        if (arg->isFree() && !arg->isScoped())
             delete arg;
 
     return res;
@@ -302,10 +367,10 @@ runtime::Variable *parser::Parser::evaluateMapOperation(std::map<std::string, st
                         secondArg,
                     });
 
-    if (secondArg->isFree())
+    if (secondArg->isFree() && !secondArg->isScoped())
         delete secondArg;
 
-    if (var->isFree())
+    if (var->isFree() && !var->isScoped() && var != secondArg)
         delete var;
 
     return _var;
@@ -338,10 +403,12 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
     else if (tval->mType == token::IDENTIFIER)
     {
         auto toper = tokens[*idx + 2];
-        if (this->mVariableMap.find(tval->mContent) != this->mVariableMap.end())
+        auto varName = tval->mContent;
+        auto variableMap = this->getVarScope(varName);
+        if (variableMap->find(varName) != variableMap->end())
         {
             *idx += 1;
-            var = this->mVariableMap.at(tval->mContent);
+            var = variableMap->at(varName);
             runtime::Array *arrayVar = dynamic_cast<runtime::Array *>(var);
             if (tokens[*idx + 1]->mType == token::OPERATOR && tokens[*idx + 1]->mContent == "[")
             {
@@ -358,7 +425,7 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
         else if (toper->mType == token::OPERATOR && toper->mContent == "(")
         {
             *idx += 2;
-            var = this->funcionCall(tval, tokens, idx);
+            var = this->functionCall(tval, tokens, idx);
         }
     }
     else if (tval->mType == token::OPERATOR)
@@ -436,4 +503,20 @@ void parser::Parser::skipScope(token::Token *tokens[], int *idx)
                ((currToken->mContent == "{") +
                 (-(currToken->mContent == "}")));
     } while (cnt != mBraceCount);
+}
+
+std::map<std::string, runtime::Variable *> *parser::Parser::getVarScope(std::string id)
+{
+    if (this->mScopedVariables.size() > 0)
+    {
+        auto max = mScopedVariables.size() - 1;
+        auto map = this->mScopedVariables.at(max);
+
+        if (this->mVariableMap->find(id) == this->mVariableMap->end())
+        {
+            return this->mScopedVariables.at(max);
+        }
+    }
+
+    return this->mVariableMap;
 }

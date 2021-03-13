@@ -8,7 +8,7 @@ Simple, turing complete language written in C++.
 
 ## I just wanted to make a language.
 
-This is a basic implementation of a otf tokenizer and parser. It doesn't get has very complex syntax, it doesn't even has functions. But to write a small script, the language is fine.
+This is a basic implementation of a otf tokenizer and parser. It doesn't has a complex syntax. But to write a small script, the language is fine.
 
 # Examples:
 
@@ -108,6 +108,58 @@ Your number is smaller than 5
 
 As seen above we have if-statements.  
 No elses, only ifs.
+
+## Functions
+
+```js
+"functions can be defined like this:";
+identifier:(arg1, arg2) {
+  printf("{0} {1}", arg1, arg2);
+}
+"They can be called like builtin-functions";
+identifier("Hello, ", "World!");
+```
+
+Output:
+
+```nim
+Hello, World!
+```
+
+### Scopes
+
+Functions define variables in a own scope which gets deleted when the function reaches the end.
+To force a variable in local scope use `=#` instead of `=`, and to force it in to global scope use `=$`.
+The default scope is:
+if a variable exists in global context that is used, else the local scope is used.
+Example:
+
+```js
+_WRE_1 = 1;
+localscope: () {
+    _WRE_1 =# 2;
+}
+noscope: () {
+    _WRE_1 = 2;
+}
+globalscope: () {
+    "this function creates a new global vriable";
+    _WRE_2 =$ 3;
+}
+localscope();
+printf("WRE: {0}", _WRE_1);
+noscope();
+printf("WRE: {0}", _WRE_1);
+globalscope();
+printf("WRE: {0}", _WRE_2);
+```
+output:
+
+```nim
+WRE: 1
+WRE: 2
+WRE: 3
+```
 
 ## The language has of course every bitwise operators
 
