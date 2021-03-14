@@ -10,6 +10,17 @@ namespace fastscript::runtime
     {
     }
 
+    Array::~Array()
+    {
+        for (int i = 0; i < index; i++)
+        {
+            auto var = this->data[i];
+            if (var->getOwner() == this || var->getOwner() == nullptr)
+                delete var;
+        }
+        delete data;
+    }
+
     Variable *Array::add(Variable *v)
     {
         this->data[this->index] = v;

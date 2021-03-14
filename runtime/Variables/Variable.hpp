@@ -230,5 +230,6 @@ namespace fastscript::runtime
         std::string name() { return "Array"; }
         int get_size();
         Array();
+        ~Array();
     };
 }

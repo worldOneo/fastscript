@@ -5,7 +5,7 @@
 
 namespace fastscript::runtime
 {
-    Variable *PrintFunction::execute(std::vector<Variable *> args)
+    Variable *PrintFunction::execute(std::vector<Variable *> &args)
     {
         if (args.capacity() == 0)
         {
@@ -32,7 +32,7 @@ namespace fastscript::runtime
         return nullptr;
     }
 
-    Variable *PrintFormatedFunction::execute(std::vector<Variable *> args)
+    Variable *PrintFormatedFunction::execute(std::vector<Variable *> &args)
     {
         if (args.capacity() < 1)
         {
@@ -67,7 +67,7 @@ namespace fastscript::runtime
         return nullptr;
     }
 
-    Variable *Input::execute(std::vector<Variable *> args)
+    Variable *Input::execute(std::vector<Variable *> &args)
     {
         String *stringVar = dynamic_cast<String *>(args[0]);
         if (stringVar)

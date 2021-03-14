@@ -162,7 +162,6 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                                 auto localVar = it->second;
                                 if (localVar->getScope() == mScope)
                                     delete localVar;
-
                             }
 
                             delete map;
@@ -291,11 +290,11 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
             currentVar = variableMap->at(varName);
 
         auto newVar = this->nextVariable(tokens, idx);
-        newVar->setOwner(newVar->getOwner() == nullptr ? newVar : newVar->getOwner());
+        newVar->setOwner(del ? (currentVar->getOwner() == currentVar ? newVar : currentVar->getOwner()) : newVar);
         newVar->setScope(this->mScope);
         (*variableMap)[varName] = newVar;
 
-        if (del && newVar != currentVar && newVar->getOwner() == currentVar)
+        if (del && newVar != currentVar && currentVar->getOwner() == currentVar)
             delete currentVar;
     }
     catch (std::exception &err)
@@ -353,7 +352,7 @@ runtime::Variable *parser::Parser::functionCall(token::Token *tInvoke, token::To
         pair->second = paramMap;
         this->mScopedVariables.push_back(pair);
         *idx = function->getStart();
-        
+
         return nullptr; // dont clean args
     }
 
@@ -371,7 +370,8 @@ runtime::Variable *parser::Parser::nextVariable(token::Token *tokens[], int *idx
     return this->nextVariable(tokens, idx, true);
 }
 
-runtime::Variable *parser::Parser::evaluateMapOperation(std::map<int, std::string> operationMap,
+std::vector<runtime::Variable *> params;
+runtime::Variable *parser::Parser::evaluateMapOperation(std::map<int, std::string> &operationMap,
                                                         int *idx, token::Token *potentialOperator,
                                                         token::Token *tokens[], runtime::Variable *var,
                                                         bool allowComparison)
@@ -379,11 +379,14 @@ runtime::Variable *parser::Parser::evaluateMapOperation(std::map<int, std::strin
     *idx += 1;
     runtime::Variable *secondArg = this->nextVariable(tokens, idx, allowComparison);
     std::string op = operationMap.at(potentialOperator->mHeatedContent);
-    auto _var = this->mFunctionMap.at(op)
-                    ->execute(std::vector<runtime::Variable *>{
-                        var,
-                        secondArg,
-                    });
+    params.clear();
+
+    params.push_back(var);
+    params.push_back(secondArg);
+
+    auto _var = this->mFunctionMap.at(op)->execute(params);
+
+    params.clear();
 
     if (!secondArg->getOwner() && !secondArg->getScope())
         delete secondArg;

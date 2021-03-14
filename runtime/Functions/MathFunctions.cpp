@@ -13,57 +13,57 @@ namespace fastscript::runtime
         return mathVar;
     }
 
-    Variable *Add::execute(std::vector<Variable *> args)
+    Variable *Add::execute(std::vector<Variable *> &args)
     {
         return args.at(0)->add(args.at(1));
     }
 
-    Variable *Subtract::execute(std::vector<Variable *> args)
+    Variable *Subtract::execute(std::vector<Variable *> &args)
     {
         return args.at(0)->subtract(args.at(1));
     }
 
-    Variable *Multiply::execute(std::vector<Variable *> args)
+    Variable *Multiply::execute(std::vector<Variable *> &args)
     {
         return args.at(0)->multiply(args.at(1));
     }
 
-    Variable *Divide::execute(std::vector<Variable *> args)
+    Variable *Divide::execute(std::vector<Variable *> &args)
     {
         return args.at(0)->divide(args.at(1));
     }
 
-    Variable *LogicOR::execute(std::vector<Variable *> args)
+    Variable *LogicOR::execute(std::vector<Variable *> &args)
     {
         MathVar *mathVar = ensure_mathvar(args.at(0));
         return mathVar->lor(args.at(1));
     }
 
-    Variable *LogicXOR::execute(std::vector<Variable *> args)
+    Variable *LogicXOR::execute(std::vector<Variable *> &args)
     {
         MathVar *mathVar = ensure_mathvar(args.at(0));
         return mathVar->lxor(args.at(1));
     }
 
-    Variable *LogicAND::execute(std::vector<Variable *> args)
+    Variable *LogicAND::execute(std::vector<Variable *> &args)
     {
         MathVar *mathVar = ensure_mathvar(args.at(0));
         return mathVar->land(args.at(1));
     }
 
-    Variable *LogicRSHFT::execute(std::vector<Variable *> args)
+    Variable *LogicRSHFT::execute(std::vector<Variable *> &args)
     {
         MathVar *mathVar = ensure_mathvar(args.at(0));
         return mathVar->rshft(args.at(1));
     }
 
-    Variable *LogicLSHFT::execute(std::vector<Variable *> args)
+    Variable *LogicLSHFT::execute(std::vector<Variable *> &args)
     {
         MathVar *mathVar = ensure_mathvar(args.at(0));
         return mathVar->lshft(args.at(1));
     }
 
-    Variable *AsBoolean::execute(std::vector<Variable *> args)
+    Variable *AsBoolean::execute(std::vector<Variable *> &args)
     {
         MathVar *mathVar = dynamic_cast<MathVar *>(args.at(0));
         if (mathVar)
@@ -78,7 +78,7 @@ namespace fastscript::runtime
         panic_throw("Varible %s cant be converted to Boolean", args.at(0));
     }
 
-    Variable *AsInteger::execute(std::vector<Variable *> args)
+    Variable *AsInteger::execute(std::vector<Variable *> &args)
     {
         MathVar *mathVar = dynamic_cast<MathVar *>(args.at(0));
         if (mathVar)
@@ -91,7 +91,7 @@ namespace fastscript::runtime
         panic_throw("Varible %s cant be converted to Integer", args.at(0));
     }
 
-    Variable *AsDouble::execute(std::vector<Variable *> args)
+    Variable *AsDouble::execute(std::vector<Variable *> &args)
     {
         Double *doubleVar = dynamic_cast<Double *>(args.at(0));
         if (doubleVar)
@@ -108,20 +108,20 @@ namespace fastscript::runtime
         panic_throw("Varible %s cant be converted to Double", args.at(0));
     }
 
-    Variable *Modulo::execute(std::vector<Variable *> args)
+    Variable *Modulo::execute(std::vector<Variable *> &args)
     {
         MathVar *mathVar = ensure_mathvar(args.at(0));
         return mathVar->modulo(args.at(1));
     }
 
-    Variable *CondAND::execute(std::vector<Variable *> args)
+    Variable *CondAND::execute(std::vector<Variable *> &args)
     {
         MathVar *mathVar1 = ensure_mathvar(args.at(0));
         MathVar *mathVar2 = ensure_mathvar(args.at(1));
         return new Boolean(mathVar1->as_int() && mathVar2->as_int());
     }
 
-    Variable *CondOR::execute(std::vector<Variable *> args)
+    Variable *CondOR::execute(std::vector<Variable *> &args)
     {
         MathVar *mathVar1 = ensure_mathvar(args.at(0));
         MathVar *mathVar2 = ensure_mathvar(args.at(1));

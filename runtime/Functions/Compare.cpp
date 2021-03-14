@@ -12,25 +12,25 @@ namespace fastscript::runtime
         return compVar;
     }
 
-    Variable *LogicEQ::execute(std::vector<Variable *> args)
+    Variable *LogicEQ::execute(std::vector<Variable *> &args)
     {
         Comparator *compVar = ensure_comparator(args.at(0));
         return compVar->equals(args.at(1));
     }
 
-    Variable *LogicGT::execute(std::vector<Variable *> args)
+    Variable *LogicGT::execute(std::vector<Variable *> &args)
     {
         Comparator *compVar = ensure_comparator(args.at(0));
         return compVar->greater(args.at(1));
     }
 
-    Variable *LogicLT::execute(std::vector<Variable *> args)
+    Variable *LogicLT::execute(std::vector<Variable *> &args)
     {
         Comparator *compVar = ensure_comparator(args.at(0));
         return compVar->less(args.at(1));
     }
 
-    Variable *LogicLTEQ::execute(std::vector<Variable *> args)
+    Variable *LogicLTEQ::execute(std::vector<Variable *> &args)
     {
         Comparator *compVar = ensure_comparator(args.at(0));
         Boolean *equals = compVar->equals(args.at(1));
@@ -41,7 +41,7 @@ namespace fastscript::runtime
         return new Boolean(compVar->less(args.at(1)));
     }
 
-    Variable *LogicGTEQ::execute(std::vector<Variable *> args)
+    Variable *LogicGTEQ::execute(std::vector<Variable *> &args)
     {
         Comparator *compVar = ensure_comparator(args.at(0));
         Boolean *equals = compVar->equals(args.at(1));
@@ -52,7 +52,7 @@ namespace fastscript::runtime
         return new Boolean(compVar->greater(args.at(1)));
     }
 
-    Variable *TypeOf::execute(std::vector<Variable *> args)
+    Variable *TypeOf::execute(std::vector<Variable *> &args)
     {
         if (args.size() != 1)
             throw std::runtime_error("typeof takes exactly one arguement!");
@@ -60,7 +60,7 @@ namespace fastscript::runtime
         return new String(STRING, args.at(0)->name());
     }
 
-    Variable *SizeOf::execute(std::vector<Variable *> args)
+    Variable *SizeOf::execute(std::vector<Variable *> &args)
     {
         if (args.size() != 1)
             throw std::runtime_error("typeof takes exactly one arguement!");
