@@ -35,6 +35,7 @@ namespace fastscript::parser
 
         std::vector<std::pair<int, int>> mStack;
         size_t mBraceCount = 0;
+        int mScope = 0;
 
         void asign(token::Token *currToken, token::Token *tokens[], int *idx);
         runtime::Variable *functionCall(token::Token *tInvoke, token::Token *tokens[], int *idx);

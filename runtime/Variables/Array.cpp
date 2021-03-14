@@ -13,6 +13,7 @@ namespace fastscript::runtime
     Variable *Array::add(Variable *v)
     {
         this->data[this->index] = v;
+        v->setOwner(v->getOwner() == nullptr ? this : v->getOwner());
         if (++this->index > this->size)
         {
             resize();

@@ -160,12 +160,13 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                             for (auto it = map->second->begin(); it != map->second->end(); it++)
                             {
                                 auto localVar = it->second;
-                                if (localVar->isFree() && localVar->isScoped())
+                                if (localVar->getScope() == mScope)
                                     delete localVar;
+
                             }
 
                             delete map;
-
+                            this->mScope--;
                             this->mScopedVariables.erase(this->mScopedVariables.begin() + max);
                         }
                     }
@@ -290,11 +291,11 @@ void parser::Parser::asign(token::Token *tInvoke, token::Token *tokens[], int *i
             currentVar = variableMap->at(varName);
 
         auto newVar = this->nextVariable(tokens, idx);
-        newVar->setFree(false);
-        newVar->setScoped(variableMap != this->mVariableMap);
+        newVar->setOwner(newVar->getOwner() == nullptr ? newVar : newVar->getOwner());
+        newVar->setScope(this->mScope);
         (*variableMap)[varName] = newVar;
 
-        if (del && newVar != currentVar)
+        if (del && newVar != currentVar && newVar->getOwner() == currentVar)
             delete currentVar;
     }
     catch (std::exception &err)
@@ -337,11 +338,12 @@ runtime::Variable *parser::Parser::functionCall(token::Token *tInvoke, token::To
 
         std::map<std::string, runtime::Variable *> *paramMap = new std::map<std::string, runtime::Variable *>();
         size_t i = 0;
+        this->mScope++;
         auto params = function->getParameters();
         while (i < params.size())
         {
             (*paramMap)[params.at(i)->mContent] = args.at(i);
-            args.at(i)->setScoped(true);
+            args.at(i)->setScope(this->mScope);
             i++;
         }
         std::pair<int, std::map<std::string, runtime::Variable *> *> *pair =
@@ -351,13 +353,14 @@ runtime::Variable *parser::Parser::functionCall(token::Token *tInvoke, token::To
         pair->second = paramMap;
         this->mScopedVariables.push_back(pair);
         *idx = function->getStart();
+        
         return nullptr; // dont clean args
     }
 
     auto res = this->mFunctionMap.at(tInvoke->mContent)->execute(args);
 
     for (auto arg : args)
-        if (arg->isFree() && !arg->isScoped())
+        if (!arg->getOwner() && !arg->getScope())
             delete arg;
 
     return res;
@@ -382,10 +385,10 @@ runtime::Variable *parser::Parser::evaluateMapOperation(std::map<int, std::strin
                         secondArg,
                     });
 
-    if (secondArg->isFree() && !secondArg->isScoped())
+    if (!secondArg->getOwner() && !secondArg->getScope())
         delete secondArg;
 
-    if (var->isFree() && !var->isScoped())
+    if (!var->getOwner() && !secondArg->getScope())
         delete var;
 
     return _var;

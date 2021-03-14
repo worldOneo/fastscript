@@ -22,8 +22,8 @@ namespace fastscript::runtime
     class Variable
     {
     private:
-        bool free = true; // Defines that the variable is temporary maybe deleted at every given time
-        bool scoped = false; // Defines that the variable is defined for the scope and gets deleted at the end of the scope
+        runtime::Variable *owner = nullptr; // Points to the owner.
+        int scope = 0;
 
     public:
         virtual Variable *add(Variable *variable)
@@ -50,10 +50,10 @@ namespace fastscript::runtime
         {
             return "undefined";
         };
-        bool isFree() { return this->free; }
-        void setFree(bool val) { this->free = val; }
-        bool isScoped() { return this->scoped; }
-        void setScoped(bool val) { this->scoped = val; }
+        runtime::Variable *getOwner() { return this->owner; }
+        void setOwner(runtime::Variable *val) { this->owner = val; }
+        int getScope() { return this->scope; }
+        void setScope(int val) { this->scope = val; }
         Variable(Types type, std::string data);
         Variable();
         virtual ~Variable(){};
@@ -98,7 +98,7 @@ namespace fastscript::runtime
     class Getter
     {
     public:
-        virtual Variable  *get(int i) { throw std::runtime_error("Get not implemented"); };
+        virtual Variable *get(int i) { throw std::runtime_error("Get not implemented"); };
     };
 
     class Sized
