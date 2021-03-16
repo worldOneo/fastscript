@@ -10,6 +10,11 @@ Simple, turing complete language written in C++.
 
 This is a basic implementation of a otf tokenizer and parser. It doesn't has a complex syntax. But to write a small script, the language is fine.
 
+# Disclaimer
+This is my 3rd C++ Project, it is therefore a professional smashed together mess.
+The author will not be resposible for any material, physical, or emotional damages caused
+by attempts of deciphering, reading, or running the code.
+
 # Examples:
 
 ## Variable assignment:
