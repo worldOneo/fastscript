@@ -164,6 +164,8 @@ void parser::Parser::parse(std::vector<token::Token *> program)
                                     delete localVar;
                             }
 
+
+                            delete map->second;
                             delete map;
                             this->mScope--;
                             this->mScopedVariables.erase(this->mScopedVariables.begin() + max);
