@@ -12,7 +12,7 @@ This is a basic implementation of a otf tokenizer and parser. It doesn't has a c
 
 # Disclaimer
 This is my 3rd C++ Project, it is therefore a professional smashed together mess.
-The author will not be resposible for any material, physical, or emotional damages caused
+The author will not be responsible for any material, physical, or emotional damages caused
 by attempts of deciphering, reading, or running the code.
 
 # Examples:
